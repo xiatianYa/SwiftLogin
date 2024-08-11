@@ -1,4 +1,4 @@
-let wsUrl = "ws://127.0.0.1:8080/websocket/gameServer";
+let wsUrl = "ws://www.bluearchive.top:8080/websocket/gameServer";
 import gameEnum from "./gameEnum";
 import useStore from "@/store";
 import { createDiscreteApi } from "naive-ui";
@@ -61,6 +61,12 @@ const Websocket: any = {
           //如果返回状态为 true 或 全局isAutomatic 为 false
           if (!serverInfo.status || !globalStore.isAutomatic) return;
           globalStore.isAutomatic = false;
+          //发送消息
+          Websocket.notification["success"]({
+            content: "挤服成功",
+            duration: 3000,
+            keepAliveOnHover: true,
+          });
           const aLink = document.createElement("a");
           aLink.href =
             "steam://rungame/730/76561198977557298/+connect " +

@@ -13,10 +13,6 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""), // 路径重写，将 '/api' 前缀去掉
       },
-      "/steamApi": {
-        target: "https://bluearchive.top/",
-        changeOrigin: true,
-      },
     },
   },
   resolve: {

@@ -393,10 +393,6 @@ const closeAutomatic = () => {
     automaticNumber.value = 0;
     //初始化按钮
     automaticPersonnel.value = false;
-    //发送消息
-    message.success("挤服成功", {
-        duration: 5000
-    })
 }
 
 //关闭挂机模式任务
