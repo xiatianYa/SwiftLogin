@@ -1,5 +1,5 @@
 <template>
-    <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme="darkTheme">
+    <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme="globalStore.nightCycle ? null : darkTheme">
         <n-notification-provider placement="bottom-right">
             <n-message-provider>
                 <RouterView />

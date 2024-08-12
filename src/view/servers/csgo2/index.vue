@@ -40,7 +40,7 @@
                 <n-card :bordered="false">
                     <n-space class="mb-10">
                         <span>
-                            地图名称 : {{ serverInfo.mapName }}
+                            地图名称 : {{ serverInfo.map }}
                         </span>
                         <span>
                             译名 : {{ serverInfo.mapName }}
@@ -48,6 +48,7 @@
                     </n-space>
                     <n-space class="mb-10" vertical>
                         <n-input-number class="mb-5" v-model:value="automaticPersonnelNumber"
+                            :disabled="automaticInterval || automaticPersonnel || automaticMap"
                             placeholder="最小玩家数 (小于或于时自动进入服务器)" :min="0" clearable>
                             <template #minus-icon>
                                 <n-icon :component="ArrowDownCircleOutline" />
@@ -57,6 +58,7 @@
                             </template>
                         </n-input-number>
                         <n-input-number class="mb-5" v-model:value="automaticIntervalNumber"
+                            :disabled="automaticInterval || automaticPersonnel || automaticMap"
                             placeholder="挂机间隔 (每隔多少分钟重新进入服务器)" :min="1" clearable>
                             <template #minus-icon>
                                 <n-icon :component="ArrowDownCircleOutline" />
@@ -71,7 +73,8 @@
                             <span class="mr-5">
                                 自动挤服
                             </span>
-                            <n-switch v-model:value="automaticPersonnel" size="large" :disabled="automaticInterval"
+                            <n-switch v-model:value="automaticPersonnel" size="large"
+                                :disabled="automaticInterval || automaticMap"
                                 :on-update:value="handleAutomaticPersonnel">
                                 <template #checked-icon>
                                     <n-icon :component="CaretBackCircleOutline" />
@@ -85,7 +88,8 @@
                             <span class="mr-5">
                                 自动挂机
                             </span>
-                            <n-switch v-model:value="automaticInterval" size="large" :disabled="automaticPersonnel"
+                            <n-switch v-model:value="automaticInterval" size="large"
+                                :disabled="automaticPersonnel || automaticMap"
                                 :on-update:value="handleAutomaticInterval">
                                 <template #checked-icon>
                                     <n-icon :component="CaretBackCircleOutline" />
@@ -107,6 +111,8 @@
                                     功能说明：此功能允许您设定一个最小玩家数。当服务器内玩家数量减少到或低于此数时，系统将自动尝试进入该服务器。<br>
                                     配置要点：<br>
                                     仅需设置“最小玩家数”即可启用此功能。<br>
+                                    需要浏览器通知权限(重点),推荐默认允许打开!<br>
+                                    需要浏览器通知权限(重点),推荐默认允许打开!<br>
                                     <br>
                                     自动挂机：<br>
                                     功能说明：除了设定最小玩家数外，您还可以设置挂机间隔。每当达到设定的间隔时间，系统会检查当前服务器玩家数。若玩家数低于或等于设定的最小玩家数，系统将自动尝试进入服务器以进行挂机。<br>
@@ -114,6 +120,7 @@
                                     设置“最小玩家数”。<br>
                                     设置“挂机间隔”（即两次尝试进入服务器之间的时间间隔）。<br>
                                     浏览器兼容性：请注意，此自动挂机功能在谷歌浏览器中可能不可用。为获得最佳体验，推荐使用Microsoft Edge浏览器进行挂机操作。<br>
+                                    需要浏览器通知权限(重点),推荐默认允许打开!<br>
                                 </span>
                             </n-popover>
                         </div>
@@ -132,6 +139,45 @@
         <!-- 地图订阅 -->
         <n-drawer v-model:show="mapDialog" :width="502" placement="right">
             <n-drawer-content title="地图订阅">
+                <n-card :bordered="false">
+                    <n-space vertical class="mb-10">
+                        <n-select v-model:value="subscriptionMap" filterable placeholder="选择地图"
+                            :disabled="automaticInterval || automaticPersonnel || automaticMap"
+                            :options="selectOption.map" clearable />
+                    </n-space>
+                    <n-space class="mb-10">
+                        <div class="d_flex_ac">
+                            <span class="mr-5">
+                                地图订阅
+                            </span>
+                            <n-switch v-model:value="automaticMap" size="large"
+                                :disabled="automaticInterval || automaticPersonnel" :on-update:value="handleAutoMap">
+                                <template #checked-icon>
+                                    <n-icon :component="CaretBackCircleOutline" />
+                                </template>
+                                <template #unchecked-icon>
+                                    <n-icon :component="CaretForwardCircleOutline" />
+                                </template>
+                            </n-switch>
+                        </div>
+                        <div class="d_flex_ac d_flex_c">
+                            <n-popover trigger="hover" placement="bottom-start">
+                                <template #trigger>
+                                    <n-icon size="25">
+                                        <InformationCircleOutline />
+                                    </n-icon>
+                                </template>
+                                <span>
+                                    地图订阅：<br>
+                                    功能说明：此功能允许您选择一个地图,在获取到地图更新时立即加入服务器(不适用当前地图已存在,且人数过高,会导致进服失败!)。<br>
+                                    配置要点：<br>
+                                    仅需选择“地图”即可启用此功能。<br>
+                                    需要浏览器通知权限(重点),推荐默认允许打开!<br>
+                                </span>
+                            </n-popover>
+                        </div>
+                    </n-space>
+                </n-card>
             </n-drawer-content>
         </n-drawer>
     </div>
@@ -141,13 +187,14 @@
 import reuseTable from '@/components/reuseTable/index.vue'
 import gameSocket from '@/utils/gameSocket'
 import useStore from "@/store";
+import { listModeEnum } from '@/api/enum'
 import { listCommunity } from '@/api/community'
 import { listServer } from '@/api/server'
 import { listMap } from '@/api/map'
 import { getServerInfo } from '@/api/steamApi'
 import { CustomType } from "@/types";
 import type { Component } from 'vue'
-import { ref, h, onMounted } from 'vue';
+import { ref, h, onMounted, watch } from 'vue';
 import { NSelect, NButton, NIcon, NSpin, useNotification, NDrawer, NDrawerContent, NCard, NSpace, NSwitch, NInputNumber, NStatistic, NNumberAnimation, NPopover, useMessage, NTag } from 'naive-ui';
 import { Search, AlarmOutline, MapOutline, CopyOutline, EnterOutline, ArrowDownCircleOutline, ArrowUpCircleOutline, CaretForwardCircleOutline, CaretBackCircleOutline, InformationCircleOutline } from '@vicons/ionicons5';
 
@@ -180,6 +227,12 @@ const automaticPersonnel = ref(false)
 
 //自动挂机按键
 const automaticInterval = ref(false)
+
+//自动订阅地图按钮
+const automaticMap = ref(false)
+
+//地图订阅名称
+const subscriptionMap = ref(null)
 
 //自动挤服尝试次数 
 const automaticNumber = ref(0)
@@ -221,7 +274,9 @@ const selectOption = ref<CustomType>({
     //社区列表
     community: [],
     //地图列表
-    map: []
+    map: [],
+    //模式列表
+    mode: [],
 })
 
 //服务器表格字段
@@ -361,7 +416,7 @@ const handleAutomaticPersonnel = (value: boolean) => {
     //设置全局挤服
     globalStore.isAutomatic = true;
     let { ip, port } = serverInfo.value;
-    startAutomaticInterval(ip, port, 100);
+    startAutomaticInterval(ip, port, 150);
 }
 
 //开启/关闭自动挂机
@@ -382,6 +437,15 @@ const handleAutomaticInterval = (value: boolean) => {
     let { ip, port } = serverInfo.value;
     startonHookAutomaticInterval(ip, port, automaticIntervalNumber.value * 60000);
     automaticInterval.value = value;
+}
+
+//开启/关闭 自动订阅地图
+const handleAutoMap = (value: boolean) => {
+    if (!subscriptionMap.value) {
+        message.warning('请选择订阅地图')
+        return;
+    }
+    automaticMap.value = value;
 }
 
 //关闭自动挤服任务
@@ -488,7 +552,6 @@ const renderColor = (typeName: string) => {
                 borderColor: '',
                 textColor: ''
             }
-            break;
     }
 }
 
@@ -569,12 +632,18 @@ const optionInit = async () => {
     selectOption.value.map = mapResult.rows.map((item: any) => {
         let { name, label, tagName, typeName } = item;
         return {
-            value: name,
+            value: name.trim(),
             label,
             tagName,
             typeName
         }
     })
+    //获取所有模式
+    let modeResult: any = await listModeEnum()
+    selectOption.value.mode = Object.entries(modeResult.data).map(([key, value]) => ({
+        value: key,
+        label: value
+    }));
 }
 
 //初始化
@@ -586,7 +655,7 @@ const init = async () => {
         return {
             ...item,
             map: "获取失败!",
-            mapName: "-",
+            mapName: "获取失败",
             peopleNumber: "获取失败!"
         }
     })
@@ -623,6 +692,47 @@ const init = async () => {
     startInterval(paths);
     loading.value = false;
 }
+watch(() => serverData.value, (newValue: any, oldValue: any) => {
+    if (automaticMap.value && subscriptionMap.value) {
+        newValue.map((item: any) => {
+            if (item.map === subscriptionMap.value) {
+                //清空自动挤服
+                automaticMap.value = false;
+                subscriptionMap.value = null;
+                // 判断浏览器是否支持唤醒
+                if (window.Notification) {
+                    let popNotice = () => {
+                        const notification = new Notification('地图订阅通知', {
+                            body: "您所订阅的地图 " + subscriptionMap.value + " 已在 " + item.name + " 成功启动，并已自动为您开始挤服。"
+                        })
+                        // 点击通知的回调函数
+                        notification.onclick = function () {
+                            window.open('https://www.bluearchive.top')
+                            notification.close()
+                        }
+                    }
+                    /* 授权过通知 */
+                    if (Notification.permission === 'granted') {
+                        popNotice()
+                    } else {
+                        /* 未授权，先询问授权 */
+                        Notification.requestPermission(function (permission) {
+                            popNotice()
+                        })
+                    }
+                }
+                // 自动连接服务器
+                const aLink = document.createElement("a");
+                aLink.href =
+                    "steam://rungame/730/76561198977557298/+connect " +
+                    item.ip +
+                    ":" +
+                    item.port;
+                aLink.click();
+            }
+        })
+    }
+}, { deep: true })
 onMounted(async () => {
     //加载开启
     loading.value = true;
