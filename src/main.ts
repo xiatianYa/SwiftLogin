@@ -13,6 +13,12 @@ import "@/styles/reset.scss";
 import "@/styles/index.scss";
 // 引入全局样式
 import "@/styles/global.scss";
+//adnimate.css 动画库
+import '@/styles/animation.scss';
+//自定义字体css
+import '@/assets/iconfont/iconfont.css'
+//自定义字体js
+import '@/assets/iconfont/iconfont.js'
 import App from "./App.vue";
 
 //创建App实际

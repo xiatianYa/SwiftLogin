@@ -14,9 +14,9 @@
         <!-- 搜索 -->
         <div class="d_flex d_flex_sb mb-20">
             <n-select class="mr-10" v-model:value="queryParams.communityId" :options="selectOption.community"
-                placeholder="请选择社区" clearable />
+                placeholder="请选择社区" clearable @update:value="handleUpdateValue" />
             <n-select class="mr-10" v-model:value="queryParams.modeId" :options="selectOption.mode" placeholder="请选择模式"
-                clearable />
+                clearable @update:value="handleUpdateValue" />
             <n-button class="mr-10" strong secondary type="primary" :render-icon="renderIcon(MapOutline)"
                 @click="onMap">
                 地图订阅
@@ -250,11 +250,11 @@ const automaticIntervalNumber = ref(null)
 const loading = ref(false)
 
 // 查询参数
-const queryParams = ref({
+const queryParams = ref<any>({
     pageNum: 1,
-    pageSize: 10000,
-    communityId: null,
-    modeId: null,
+    pageSize: 999,
+    communityId: 3,
+    modeId: "1",
 })
 
 //服务器信息定时任务
@@ -276,7 +276,7 @@ const selectOption = ref<CustomType>({
     //地图列表
     map: [],
     //模式列表
-    mode: [],
+    mode: []
 })
 
 //服务器表格字段
@@ -383,6 +383,11 @@ const onMap = () => {
 //搜索服务器信息
 const onSearch = () => {
     init()
+}
+
+//改变配置自动搜索
+const handleUpdateValue = () => {
+    onSearch();
 }
 
 //自动挤服 / 挂机模式
@@ -625,8 +630,6 @@ const optionInit = async () => {
             label: name
         }
     })
-    //默认查询第一个社区
-    queryParams.value.communityId = selectOption.value.community[0].value
     //获取所有的地图
     let mapResult: any = await listMap(queryParams.value)
     selectOption.value.map = mapResult.rows.map((item: any) => {
@@ -644,6 +647,13 @@ const optionInit = async () => {
         value: key,
         label: value
     }));
+    if (localStorage.getItem("community")) {
+        queryParams.value.communityId = Number(localStorage.getItem("community"))
+
+    }
+    if (localStorage.getItem("mode")) {
+        queryParams.value.modeId = localStorage.getItem("mode")
+    }
 }
 
 //初始化
@@ -667,6 +677,7 @@ const init = async () => {
 
     //初始化服务器参数
     let responsePromise: any = await getServerInfo(paths);
+
     playNumber.value = 0;
     maxPlayNumber.value = 0;
     responsePromise.map((item: any) => {
@@ -696,9 +707,6 @@ watch(() => serverData.value, (newValue: any, oldValue: any) => {
     if (automaticMap.value && subscriptionMap.value) {
         newValue.map((item: any) => {
             if (item.map === subscriptionMap.value) {
-                //清空自动挤服
-                automaticMap.value = false;
-                subscriptionMap.value = null;
                 // 判断浏览器是否支持唤醒
                 if (window.Notification) {
                     let popNotice = () => {
@@ -729,6 +737,9 @@ watch(() => serverData.value, (newValue: any, oldValue: any) => {
                     ":" +
                     item.port;
                 aLink.click();
+                //清空自动挤服
+                automaticMap.value = false;
+                subscriptionMap.value = null;
             }
         })
     }
