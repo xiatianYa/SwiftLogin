@@ -74,12 +74,12 @@ const menuOptions: MenuOption[] = [
                 RouterLink,
                 {
                     to: {
-                        name: 'servers',
+                        name: 'cs2',
                     }
                 },
                 { default: () => '服务器查询' }
             ),
-        key: 'servers',
+        key: 'cs2',
         icon: renderIcon(GameIcon),
         children: [
             {
@@ -138,9 +138,18 @@ const menuOptions: MenuOption[] = [
         icon: renderIcon(BriefcaseIcon),
         children: [
             {
-                label: '绑键助手',
-                key: 'BindKey'
-            }
+                label: () =>
+                    h(
+                        RouterLink,
+                        {
+                            to: {
+                                name: 'bindKey',
+                            }
+                        },
+                        { default: () => '绑键助手' }
+                    ),
+                key: 'bindKey',
+            },
         ]
     },
     {

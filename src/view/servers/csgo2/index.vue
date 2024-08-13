@@ -112,7 +112,6 @@
                                     配置要点：<br>
                                     仅需设置“最小玩家数”即可启用此功能。<br>
                                     需要浏览器通知权限(重点),推荐默认允许打开!<br>
-                                    需要浏览器通知权限(重点),推荐默认允许打开!<br>
                                     <br>
                                     自动挂机：<br>
                                     功能说明：除了设定最小玩家数外，您还可以设置挂机间隔。每当达到设定的间隔时间，系统会检查当前服务器玩家数。若玩家数低于或等于设定的最小玩家数，系统将自动尝试进入服务器以进行挂机。<br>
@@ -254,7 +253,7 @@ const queryParams = ref<any>({
     pageNum: 1,
     pageSize: 999,
     communityId: 3,
-    modeId: "1",
+    modeId: null,
 })
 
 //服务器信息定时任务
@@ -476,6 +475,7 @@ const closeOnHook = () => {
 
 //连接服务器
 const onPlay = (row: any) => {
+    message.success("成功连接")
     const aLink = document.createElement('a');
     aLink.href = "steam://rungame/730/76561198977557298/+connect " + row.ip + ":" + row.port;
     aLink.click();

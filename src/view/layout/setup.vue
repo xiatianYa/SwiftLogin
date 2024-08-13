@@ -80,9 +80,13 @@ const optionInit = async () => {
 const saveSet = () => {
   if (communityId.value) {
     localStorage.setItem("community", communityId.value)
+  } else {
+    localStorage.removeItem("community")
   }
   if (modeId.value) {
     localStorage.setItem("mode", modeId.value)
+  } else {
+    localStorage.removeItem("mode")
   }
   message.success("保存成功")
 }

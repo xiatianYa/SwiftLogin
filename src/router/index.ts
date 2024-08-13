@@ -41,6 +41,13 @@ const router = createRouter({
           path: "/tool",
           name: "tool",
           component: () => import("@/view/tool/index.vue"),
+          children: [
+            {
+              path: "bindKey",
+              name: "bindKey",
+              component: () => import("@/view/tool/bindKey/index.vue"),
+            },
+          ],
         },
         {
           path: "/map",
