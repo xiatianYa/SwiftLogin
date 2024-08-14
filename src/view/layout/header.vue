@@ -8,10 +8,10 @@
                 <n-space style="height: 100%;" class="d_flex_ac ml-10">
                     <n-switch size="large" v-model="globalStore.nightCycle" :on-update:value="handleCycle">
                         <template #checked-icon>
-                            <n-icon :component="SunnyOutline" />
+                            🌞
                         </template>
                         <template #unchecked-icon>
-                            <n-icon :component="MoonOutline" />
+                            🌝
                         </template>
                     </n-switch>
                 </n-space>
@@ -35,8 +35,6 @@ import {
     MapOutline as MapIcon,
     VideocamOutline as VideocamIcon,
     PeopleCircleOutline as PeopleCircleIcon,
-    SunnyOutline,
-    MoonOutline
 } from '@vicons/ionicons5'
 
 //全局仓库
@@ -79,7 +77,7 @@ const menuOptions: MenuOption[] = [
                 },
                 { default: () => '服务器查询' }
             ),
-        key: 'cs2',
+        key: 'server',
         icon: renderIcon(GameIcon),
         children: [
             {
@@ -129,7 +127,7 @@ const menuOptions: MenuOption[] = [
                 RouterLink,
                 {
                     to: {
-                        name: 'tool',
+                        name: 'bindKey',
                     }
                 },
                 { default: () => '工具箱' }

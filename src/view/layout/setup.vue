@@ -12,6 +12,15 @@
               clearable />
             <n-select class="mb-10" v-model:value="modeId" :options="selectOption.mode" placeholder="请选择指定模式"
               clearable />
+            <n-switch class="mb-10" size="large" v-model="nightCycle" :on-update:value="handleCycle"
+              :default-value="nightCycle">
+              <template #checked-icon>
+                🌞
+              </template>
+              <template #unchecked-icon>
+                🌝
+              </template>
+            </n-switch>
           </n-space>
           <n-space>
             <n-button class="mr-10" strong secondary type="success" :render-icon="renderIcon(SaveOutline)"
@@ -25,16 +34,31 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, Component, h, nextTick } from 'vue'
-import { NSelect, NDrawer, NDrawerContent, NCard, NSpace, useMessage, NButton, NIcon } from 'naive-ui';
+import useStore from "@/store";
+import { ref, onMounted, Component, h } from 'vue'
+import { NSelect, NDrawer, NDrawerContent, NCard, NSpace, useMessage, NButton, NIcon, NSwitch } from 'naive-ui';
+import { stringToBoolean } from '@/utils/common'
 import { SaveOutline } from '@vicons/ionicons5';
 import { CustomType } from '@/types';
 import { listModeEnum } from '@/api/enum'
 import { listCommunity } from '@/api/community'
+
+//全局仓库
+let { globalStore } = useStore();
+
 //消息对象
 const message = useMessage();
+
+//指定社区
 const communityId = ref<any>(null);
+
+//指定模式
 const modeId = ref<any>(null)
+
+//指定夜间/白天
+const nightCycle = ref<any>(false);
+
+//抽屉
 const setDialog = ref(false);
 
 //select配置项
@@ -44,6 +68,12 @@ const selectOption = ref<CustomType>({
   //模式列表
   mode: []
 })
+
+//控制白天模式 / 黑夜模式 
+const handleCycle = (value: boolean) => {
+  globalStore.nightCycle = value;
+  nightCycle.value = value;
+}
 
 //注册图标
 const renderIcon = (icon: Component) => {
@@ -69,10 +99,12 @@ const optionInit = async () => {
   }));
   if (localStorage.getItem("community")) {
     communityId.value = Number(localStorage.getItem("community"))
-
   }
   if (localStorage.getItem("mode")) {
     modeId.value = localStorage.getItem("mode")
+  }
+  if (localStorage.getItem("nightCycle")) {
+    nightCycle.value = stringToBoolean(localStorage.getItem("nightCycle"))
   }
 }
 
@@ -88,7 +120,12 @@ const saveSet = () => {
   } else {
     localStorage.removeItem("mode")
   }
-  message.success("保存成功")
+  if (nightCycle.value != null) {
+    localStorage.setItem("nightCycle", nightCycle.value)
+  } else {
+    localStorage.removeItem("nightCycle")
+  }
+  message.success("设置成功")
 }
 
 onMounted(() => {

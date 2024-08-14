@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { stringToBoolean } from "@/utils/common";
 import gameSocket from "@/utils/gameSocket";
 export interface Global {
   //是否在自动挤服
@@ -12,7 +13,7 @@ export const useGloBalStore = defineStore("global", {
     return {
       //是否在自动挤服
       isAutomatic: false,
-      nightCycle: false,
+      nightCycle: stringToBoolean(localStorage.getItem("nightCycle")),
     };
   },
   actions: {

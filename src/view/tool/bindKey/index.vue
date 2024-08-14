@@ -100,7 +100,7 @@ const keyOptions = ref([
     { "label": "滚轮向上", "value": "mwheelup" },
     { "label": "小键盘.", "value": "kp_del" },
     { "label": "小键盘*", "value": "kp_multiply" },
-    { "label": "小键盘-", "value": "kp_enter" },
+    { "label": "小键盘-", "value": "kp_minus" },
     { "label": "小键盘+", "value": "kp_plus" },
     { "label": "小键盘/", "value": "kp_slash" },
     { "label": "小键盘回车", "value": "kp_enter" },
@@ -174,19 +174,28 @@ const renderIcon = (icon: Component) => {
 }
 //保存指令
 const saveButton = async () => {
-    instruct.value = value.value?.replace("value", key.value)
-    try {
-        await navigator.clipboard.writeText(instruct.value);
-        notification.success({
-            content: '复制成功',
-            meta: '已复制连接指令.',
-            duration: 1500,
-            keepAliveOnHover: true
-        })
-    } catch (error) {
+    if (key.value && value.value) {
+        instruct.value = value.value?.replace("value", key.value)
+        try {
+            await navigator.clipboard.writeText(instruct.value);
+            notification.success({
+                content: '复制成功',
+                meta: '已复制绑定指令.',
+                duration: 1500,
+                keepAliveOnHover: true
+            })
+        } catch (error) {
+            notification.error({
+                content: '复制失败',
+                meta: '复制绑定指令失败.',
+                duration: 1500,
+                keepAliveOnHover: true
+            })
+        }
+    } else {
         notification.error({
-            content: '复制失败',
-            meta: '复制连接指令失败.',
+            content: '绑键失败',
+            meta: '请选择绑定的键和绑定的指令',
             duration: 1500,
             keepAliveOnHover: true
         })
