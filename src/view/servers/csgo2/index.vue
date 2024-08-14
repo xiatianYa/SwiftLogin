@@ -420,7 +420,7 @@ const handleAutomaticPersonnel = (value: boolean) => {
     //设置全局挤服
     globalStore.isAutomatic = true;
     let { ip, port } = serverInfo.value;
-    startAutomaticInterval(ip, port, 150);
+    startAutomaticInterval(ip, port, 120);
 }
 
 //开启/关闭自动挂机
@@ -583,7 +583,7 @@ const startonHookAutomaticInterval = (ip: string, port: number, time: number) =>
         //当前挤服任务还存在 则退出
         if (getAutomaticInterval.value) return;
         //开始挤服
-        startAutomaticInterval(ip, port, 150);
+        startAutomaticInterval(ip, port, 120);
         //挂机进服次数++
         onHookNumber.value++;
     }, time);

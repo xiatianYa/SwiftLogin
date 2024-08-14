@@ -51,14 +51,21 @@ const Websocket: any = {
           Websocket.reconnect_timer = null;
           Websocket.notification["success"]({
             content: "连接成功",
-            meta: "服务器连接成功",
-            duration: 1500,
+            meta: "推荐使用Microsoft Edge浏览器,谷歌浏览器限制过多!",
+            duration: 5000,
             keepAliveOnHover: true,
           });
           break;
         case gameEnum.ServerMessageSuccessType:
           let serverInfo = JSON.parse(data.data);
           //如果返回状态为 true 或 全局isAutomatic 为 false
+          const aLink = document.createElement("a");
+          aLink.href =
+            "steam://rungame/730/76561198977557298/+connect " +
+            serverInfo.ip +
+            ":" +
+            serverInfo.port;
+          aLink.click();
           if (!serverInfo.status || !globalStore.isAutomatic) return;
           globalStore.isAutomatic = false;
           //发送消息
@@ -67,13 +74,6 @@ const Websocket: any = {
             duration: 3000,
             keepAliveOnHover: true,
           });
-          const aLink = document.createElement("a");
-          aLink.href =
-            "steam://rungame/730/76561198977557298/+connect " +
-            serverInfo.ip +
-            ":" +
-            serverInfo.port;
-          aLink.click();
           break;
         default:
           break;

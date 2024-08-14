@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="mapPag p-20">
        地图
    </div>
 </template>

@@ -1,12 +1,13 @@
 <template>
     <div class="headerPage">
-        <n-split :default-size="0.8">
+        <n-split :default-size="0.9">
             <template #1>
                 <n-menu v-model="activeKey" mode="horizontal" :options="menuOptions" responsive :inverted="inverted" />
             </template>
             <template #2>
                 <n-space style="height: 100%;" class="d_flex_ac ml-10">
-                    <n-switch size="large" v-model="globalStore.nightCycle" :on-update:value="handleCycle">
+                    <n-switch size="large" v-model:value="globalStore.nightCycle" :on-update:value="handleCycle"
+                        :default-value="globalStore.nightCycle" :round="false">
                         <template #checked-icon>
                             🌞
                         </template>
@@ -14,6 +15,7 @@
                             🌝
                         </template>
                     </n-switch>
+
                 </n-space>
             </template>
         </n-split>
@@ -41,6 +43,8 @@ import {
 let { globalStore } = useStore();
 
 const inverted = ref(false)
+
+
 const activeKey = ref<string | null>(null)
 
 //注册图标

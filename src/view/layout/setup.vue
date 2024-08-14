@@ -12,8 +12,8 @@
               clearable />
             <n-select class="mb-10" v-model:value="modeId" :options="selectOption.mode" placeholder="请选择指定模式"
               clearable />
-            <n-switch class="mb-10" size="large" v-model="nightCycle" :on-update:value="handleCycle"
-              :default-value="nightCycle">
+            <n-switch class="mb-10" size="large" v-model:value="globalStore.nightCycle" :on-update:value="handleCycle"
+              :default-value="globalStore.nightCycle" :round="false">
               <template #checked-icon>
                 🌞
               </template>
@@ -37,7 +37,6 @@
 import useStore from "@/store";
 import { ref, onMounted, Component, h } from 'vue'
 import { NSelect, NDrawer, NDrawerContent, NCard, NSpace, useMessage, NButton, NIcon, NSwitch } from 'naive-ui';
-import { stringToBoolean } from '@/utils/common'
 import { SaveOutline } from '@vicons/ionicons5';
 import { CustomType } from '@/types';
 import { listModeEnum } from '@/api/enum'
@@ -55,9 +54,6 @@ const communityId = ref<any>(null);
 //指定模式
 const modeId = ref<any>(null)
 
-//指定夜间/白天
-const nightCycle = ref<any>(false);
-
 //抽屉
 const setDialog = ref(false);
 
@@ -72,7 +68,6 @@ const selectOption = ref<CustomType>({
 //控制白天模式 / 黑夜模式 
 const handleCycle = (value: boolean) => {
   globalStore.nightCycle = value;
-  nightCycle.value = value;
 }
 
 //注册图标
@@ -103,9 +98,6 @@ const optionInit = async () => {
   if (localStorage.getItem("mode")) {
     modeId.value = localStorage.getItem("mode")
   }
-  if (localStorage.getItem("nightCycle")) {
-    nightCycle.value = stringToBoolean(localStorage.getItem("nightCycle"))
-  }
 }
 
 //保存用户设置
@@ -120,8 +112,8 @@ const saveSet = () => {
   } else {
     localStorage.removeItem("mode")
   }
-  if (nightCycle.value != null) {
-    localStorage.setItem("nightCycle", nightCycle.value)
+  if (globalStore.nightCycle != null) {
+    localStorage.setItem("nightCycle", String(globalStore.nightCycle))
   } else {
     localStorage.removeItem("nightCycle")
   }
