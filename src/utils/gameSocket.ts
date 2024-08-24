@@ -59,15 +59,15 @@ const Websocket: any = {
         case gameEnum.ServerMessageSuccessType:
           let serverInfo = JSON.parse(data.data);
           //如果返回状态为 true 或 全局isAutomatic 为 false
+          if (!serverInfo.status || !globalStore.isAutomatic) return;
           const aLink = document.createElement("a");
+          globalStore.isAutomatic = false;
           aLink.href =
             "steam://rungame/730/76561198977557298/+connect " +
             serverInfo.ip +
             ":" +
             serverInfo.port;
           aLink.click();
-          if (!serverInfo.status || !globalStore.isAutomatic) return;
-          globalStore.isAutomatic = false;
           //发送消息
           Websocket.notification["success"]({
             content: "挤服成功",

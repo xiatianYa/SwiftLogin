@@ -186,7 +186,7 @@
 import reuseTable from '@/components/reuseTable/index.vue'
 import gameSocket from '@/utils/gameSocket'
 import useStore from "@/store";
-import { listModeEnum } from '@/api/enum'
+import { listModeEnum, listTagEnum } from '@/api/enum'
 import { listCommunity } from '@/api/community'
 import { listServer } from '@/api/server'
 import { listMap } from '@/api/map'
@@ -275,11 +275,91 @@ const selectOption = ref<CustomType>({
     //地图列表
     map: [],
     //模式列表
-    mode: []
+    mode: [],
+    //标签列表
+    tag: []
 })
 
 //服务器表格字段
 const serverColumns = ref([
+    {
+        type: 'expand',
+        expandable: (rowData: any) => rowData.peopleNumber !== '获取失败!',
+        renderExpand: (rowData: any) => {
+            return h('div', [
+                h('div', {
+                    class: "d_flex_ac d_flex_column",
+                    style: {
+                        width: '30%'
+                    }
+                }, [
+                    //左侧盒子
+                    h('div', {
+                        class: "d_flex_ac d_flex_column",
+                        style: {
+                            width: "100%"
+                        }
+                    },
+                        [
+                            h('h4', rowData.map),
+                            h('h4', "(" + rowData.mapName + ")"),
+                            h('div', {
+                                class: "d_flex"
+                            }, [
+                                h('img', {
+                                    src: rowData.mapUrl,
+                                    alt: '地图图片',
+                                    class: "mt-10 mr-10",
+                                    style: {
+                                        width: '100px',
+                                        height: '100px',
+                                    },
+                                }),
+                                h('div', {
+                                    class: "d_flex mt-10"
+                                }, [
+                                    h('span', {
+                                        class: "d_flex"
+                                    }, [
+                                        h(
+                                            NTag,
+                                            {
+                                                color: renderColor(rowData.typeName),
+                                                size: 'small',
+                                            },
+                                            { default: () => rowData.typeName }
+                                        )
+                                    ]),
+                                    h('span', {
+                                        class: "d_flex"
+                                    }, rowData.tagName ? rowData.tagName.split(",").filter((item: any) => item != null && item != '').map((item: any) => {
+                                        return h(
+                                            NTag,
+                                            {
+                                                size: 'small',
+                                                type: "success",
+                                                class: "ml-5"
+                                            },
+                                            { default: () => item }
+                                        )
+                                    }) : ""
+                                    )
+                                ])
+                            ])
+                        ]),
+                ]),
+                //右侧盒子
+                h('div', {
+                    style: {
+                        width: '70%'
+                    }
+                }, [
+
+                ])
+            ]
+            )
+        }
+    },
     {
         title: '模式',
         key: 'modeName',
@@ -386,6 +466,11 @@ const onSearch = () => {
 
 //改变配置自动搜索
 const handleUpdateValue = () => {
+    //避免bug 清除定时器任务
+    if (getServerInterval.value) {
+        clearInterval(getServerInterval.value);
+        getServerInterval.value = null; // 可选，但有助于避免潜在的bug  
+    }
     onSearch();
 }
 
@@ -417,6 +502,8 @@ const handleAutomaticPersonnel = (value: boolean) => {
         closeAutomatic()
         return;
     }
+    //当前挤服任务还存在 则退出
+    if (getAutomaticInterval.value) return;
     //设置全局挤服
     globalStore.isAutomatic = true;
     let { ip, port } = serverInfo.value;
@@ -591,31 +678,50 @@ const startonHookAutomaticInterval = (ip: string, port: number, time: number) =>
 
 //自动获取列表服务器信息
 const startInterval = (paths: Array<string>) => {
-    //避免bug 清除定时器任务
-    if (getServerInterval.value) {
-        clearInterval(getServerInterval.value);
-        getServerInterval.value = null; // 可选，但有助于避免潜在的bug  
-    }
     //开启定时任务 持续获取服务器信息
     getServerInterval.value = setInterval(async () => {
+        //获取所有服务器
+        let serverResult: any = await listServer(queryParams.value)
+        serverResult = serverResult.rows.map((item: any) => {
+            return {
+                ...item,
+                map: "获取失败!",
+                mapName: "获取失败",
+                peopleNumber: "获取失败!"
+            }
+        })
+        //处理服务器路径参数
+        let paths = serverResult.map((item: any) => {
+            let { ip, port } = item;
+            return ip + ":" + port
+        })
+
+        //初始化服务器参数
         let responsePromise: any = await getServerInfo(paths);
+
         playNumber.value = 0;
         maxPlayNumber.value = 0;
         responsePromise.map((item: any) => {
+            //获取服务器信息
             let serverInfo = item.response.servers
             if (!serverInfo) return;
+            //获取服务器地址 地图名 在线玩家 最大玩家
             let { addr, map, players, max_players } = serverInfo[0]
-            serverInfo = serverData.value.find((item: any) => item.ip + ":" + item.port == addr);
-            serverInfo.mapName = map;
+            serverInfo = serverResult.find((item: any) => item.ip + ":" + item.port == addr);
+            serverInfo.key = serverInfo.id;
+            serverInfo.map = map;
             serverInfo.peopleNumber = players + "/" + max_players;
             //获取地图译名
             let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
+            serverInfo.mapUrl = mapName.mapUrl ? mapName.mapUrl : "";
+            serverInfo.tagName = mapName.tagName ? mapName.tagName : "";
             serverInfo.typeName = mapName ? mapName.typeName : '';
             serverInfo.mapName = mapName ? mapName.label : '暂无译名';
             //配置表头在线人数
             playNumber.value += players;
             maxPlayNumber.value += max_players;
         })
+        serverData.value = serverResult;
     }, 6000); // 每6秒执行一次  
 }
 
@@ -633,14 +739,22 @@ const optionInit = async () => {
     //获取所有的地图
     let mapResult: any = await listMap(queryParams.value)
     selectOption.value.map = mapResult.rows.map((item: any) => {
-        let { name, label, tagName, typeName } = item;
+        let { name, label, tagName, typeName, mapUrl } = item;
         return {
             value: name.trim(),
             label,
             tagName,
+            mapUrl,
             typeName
         }
     })
+    //获取所有地图标签
+    let tagResult: any = await listTagEnum()
+    selectOption.value.tag = Object.entries(tagResult.data).map(([key, value]) => ({
+        value: key,
+        label: value
+    }));
+
     //获取所有模式
     let modeResult: any = await listModeEnum()
     selectOption.value.mode = Object.entries(modeResult.data).map(([key, value]) => ({
@@ -687,10 +801,13 @@ const init = async () => {
         //获取服务器地址 地图名 在线玩家 最大玩家
         let { addr, map, players, max_players } = serverInfo[0]
         serverInfo = serverResult.find((item: any) => item.ip + ":" + item.port == addr);
+        serverInfo.key = serverInfo.id;
         serverInfo.map = map;
         serverInfo.peopleNumber = players + "/" + max_players;
         //获取地图译名
         let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
+        serverInfo.mapUrl = mapName.mapUrl ? mapName.mapUrl : "";
+        serverInfo.tagName = mapName.tagName ? mapName.tagName : "";
         serverInfo.typeName = mapName ? mapName.typeName : '';
         serverInfo.mapName = mapName ? mapName.label : '暂无译名';
         //配置表头在线人数
@@ -698,7 +815,6 @@ const init = async () => {
         maxPlayNumber.value += max_players;
     })
     serverData.value = serverResult;
-
     //开启定时任务
     startInterval(paths);
     loading.value = false;

@@ -163,7 +163,7 @@ const menuOptions: MenuOption[] = [
                         name: 'map',
                     }
                 },
-                { default: () => '僵尸逃跑地图' }
+                { default: () => '地图列表' }
             ),
         key: 'map',
         icon: renderIcon(MapIcon)

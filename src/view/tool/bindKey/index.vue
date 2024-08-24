@@ -1,5 +1,9 @@
 <template>
-    <div class="toolPage p-20">
+    <div class="toolPage">
+        <!-- 数据统计 -->
+        <div class="d_flex_ac d_flex_sb mb-20">
+            <div class="title">绑键工具</div>
+        </div>
         <!-- 工具绑定栏 -->
         <div class="d_flex d_flex_sb mb-20">
             <n-select class="mr-5" v-model:value="key" :options="keyOptions" placeholder="请选择按键" clearable />
@@ -133,6 +137,8 @@ const valueOptions = ref([
     { "label": "火瓶", "value": `bind "value" "say !fire";` },
     { "label": "血针", "value": `bind "value" "say !xz";` },
     { "label": "护甲(EXG)", "value": `bind "value" "say !kevlar";` },
+    { "label": "夜视仪:开启(EXG)", "value": `bind "value" "say toggle mat_fullbright 1";` },
+    { "label": "夜视仪:关闭(EXG)", "value": `bind "value" "say toggle mat_fullbright 0";` },
     { "label": "bizon", "value": `bind "value" "say !bizon";` },
     { "label": "mac10 ", "value": `bind "value" "say !mac10";` },
     { "label": "mp5", "value": `bind "value" "say !mp5";` },
@@ -166,6 +172,7 @@ const valueOptions = ref([
     { "label": "usp", "value": `bind "value" "say !usp";` },
     { "label": "cz", "value": `bind "value" "say !cz";` },
     { "label": "r8", "value": `bind "value" "say !r8";` },
+    { "label": "AA12(EXG)", "value": `bind "value" "say !aa12";` },
 ])
 
 //注册图标
@@ -204,7 +211,12 @@ const saveButton = async () => {
 </script>
 
 <style scoped lang="scss">
-.csgo2Page {
+.toolPage {
     height: auto;
+
+    .title {
+        font-size: 16px;
+        font-weight: bolder
+    }
 }
 </style>
