@@ -52,7 +52,7 @@ const Websocket: any = {
           Websocket.notification["success"]({
             content: "连接成功",
             meta: "推荐使用Microsoft Edge浏览器,谷歌浏览器限制过多!",
-            duration: 5000,
+            duration: 3000,
             keepAliveOnHover: true,
           });
           break;

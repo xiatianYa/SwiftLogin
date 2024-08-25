@@ -194,7 +194,7 @@ import { getServerInfo } from '@/api/steamApi'
 import { CustomType } from "@/types";
 import type { Component } from 'vue'
 import { ref, h, onMounted, watch } from 'vue';
-import { NSelect, NButton, NIcon, NSpin, useNotification, NDrawer, NDrawerContent, NCard, NSpace, NSwitch, NInputNumber, NStatistic, NNumberAnimation, NPopover, useMessage, NTag } from 'naive-ui';
+import { NSelect, NButton, NIcon, NImage, NSpin, useNotification, NDrawer, NDrawerContent, NCard, NSpace, NSwitch, NInputNumber, NStatistic, NNumberAnimation, NPopover, useMessage, NTag } from 'naive-ui';
 import { Search, AlarmOutline, MapOutline, CopyOutline, EnterOutline, ArrowDownCircleOutline, ArrowUpCircleOutline, CaretForwardCircleOutline, CaretBackCircleOutline, InformationCircleOutline } from '@vicons/ionicons5';
 
 //全局仓库
@@ -284,7 +284,7 @@ const selectOption = ref<CustomType>({
 const serverColumns = ref([
     {
         type: 'expand',
-        expandable: (rowData: any) => rowData.peopleNumber !== '获取失败!',
+        expandable: (rowData: any) => rowData.peopleNumber !== '获取失败!' && rowData.mapName !== '暂无译名',
         renderExpand: (rowData: any) => {
             return h('div', [
                 h('div', {
@@ -295,7 +295,7 @@ const serverColumns = ref([
                 }, [
                     //左侧盒子
                     h('div', {
-                        class: "d_flex_ac d_flex_column",
+                        class: "d_flex_ac d_flex_column ml-80",
                         style: {
                             width: "100%"
                         }
@@ -306,14 +306,10 @@ const serverColumns = ref([
                             h('div', {
                                 class: "d_flex"
                             }, [
-                                h('img', {
+                                h(NImage, {
                                     src: rowData.mapUrl,
-                                    alt: '地图图片',
-                                    class: "mt-10 mr-10",
-                                    style: {
-                                        width: '100px',
-                                        height: '100px',
-                                    },
+                                    width: 200,
+                                    class: "mr-10 mt-10"
                                 }),
                                 h('div', {
                                     class: "d_flex mt-10"
@@ -713,8 +709,8 @@ const startInterval = (paths: Array<string>) => {
             serverInfo.peopleNumber = players + "/" + max_players;
             //获取地图译名
             let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
-            serverInfo.mapUrl = mapName.mapUrl ? mapName.mapUrl : "";
-            serverInfo.tagName = mapName.tagName ? mapName.tagName : "";
+            serverInfo.mapUrl = mapName?.mapUrl ? mapName.mapUrl : "";
+            serverInfo.tagName = mapName?.tagName ? mapName.tagName : "";
             serverInfo.typeName = mapName ? mapName.typeName : '';
             serverInfo.mapName = mapName ? mapName.label : '暂无译名';
             //配置表头在线人数
@@ -806,8 +802,8 @@ const init = async () => {
         serverInfo.peopleNumber = players + "/" + max_players;
         //获取地图译名
         let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
-        serverInfo.mapUrl = mapName.mapUrl ? mapName.mapUrl : "";
-        serverInfo.tagName = mapName.tagName ? mapName.tagName : "";
+        serverInfo.mapUrl = mapName?.mapUrl ? mapName.mapUrl : "";
+        serverInfo.tagName = mapName?.tagName ? mapName.tagName : "";
         serverInfo.typeName = mapName ? mapName.typeName : '';
         serverInfo.mapName = mapName ? mapName.label : '暂无译名';
         //配置表头在线人数

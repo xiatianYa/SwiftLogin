@@ -55,11 +55,6 @@ const router = createRouter({
           component: () => import("@/view/map/index.vue"),
         },
         {
-          path: "/live",
-          name: "live",
-          component: () => import("@/view/live/index.vue"),
-        },
-        {
           path: "/chat",
           name: "chat",
           component: () => import("@/view/chat/index.vue"),

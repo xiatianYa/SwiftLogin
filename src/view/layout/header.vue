@@ -97,32 +97,6 @@ const menuOptions: MenuOption[] = [
                     ),
                 key: 'cs2',
             },
-            // {
-            //     label: () =>
-            //         h(
-            //             RouterLink,
-            //             {
-            //                 to: {
-            //                     name: 'projectZomboid',
-            //                 }
-            //             },
-            //             { default: () => '僵尸毁灭工程' }
-            //         ),
-            //     key: 'projectZomboid',
-            // },
-            // {
-            //     label: () =>
-            //         h(
-            //             RouterLink,
-            //             {
-            //                 to: {
-            //                     name: '7daysToDie',
-            //                 }
-            //             },
-            //             { default: () => '七日杀' }
-            //         ),
-            //     key: '7daysToDie',
-            // },
         ]
     },
     {
@@ -167,20 +141,6 @@ const menuOptions: MenuOption[] = [
             ),
         key: 'map',
         icon: renderIcon(MapIcon)
-    },
-    {
-        label: () =>
-            h(
-                RouterLink,
-                {
-                    to: {
-                        name: 'live',
-                    }
-                },
-                { default: () => '直播推荐' }
-            ),
-        key: 'live',
-        icon: renderIcon(VideocamIcon)
     },
     {
         label: () =>

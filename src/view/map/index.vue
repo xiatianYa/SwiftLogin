@@ -51,7 +51,7 @@ import reusePagination from '@/components/reusePagination/index.vue'
 import { ref, h, Component, onMounted } from 'vue';
 import { listModeEnum, listTagEnum, listTypeEnum } from '@/api/enum'
 import { listMap } from '@/api/map'
-import { NSelect, NButton, NIcon, NInput, NTag } from 'naive-ui';
+import { NSelect, NButton, NIcon, NInput, NTag, NImage } from 'naive-ui';
 import { Search, TrashOutline } from '@vicons/ionicons5';
 import { CustomType } from '@/types';
 //数据加载
@@ -97,7 +97,14 @@ const mapColumns = ref([
     },
     {
         title: '图片',
-        key: 'mapUrl'
+        key: 'mapUrl',
+        render(rowData: any) {
+            return h(NImage, {
+                src: rowData.mapUrl,
+                width: 200,
+                height: 100,
+            })
+        }
     },
     {
         title: '标签',
