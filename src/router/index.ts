@@ -61,6 +61,12 @@ const router = createRouter({
         },
       ],
     },
+    //未知路由 全部前往404页面
+    {
+      path: "/:pathMatch(.*)*", // 使用正则通配符来匹配任何路径
+      name: "404",
+      component: () => import("@/view/result/404.vue"),
+    },
   ],
 });
 

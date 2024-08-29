@@ -10,14 +10,9 @@
 
 <script setup lang="ts">
 import useStore from "@/store"
-import { onMounted } from 'vue';
 import { NConfigProvider, NNotificationProvider, NMessageProvider, zhCN, dateZhCN, darkTheme } from 'naive-ui'
 import { RouterView } from 'vue-router'
 let { globalStore } = useStore()
-
-onMounted(() => {
-    globalStore.initSocket()
-})
 </script>
 
 <style scoped lang="scss"></style>

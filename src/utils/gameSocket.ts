@@ -50,18 +50,29 @@ const Websocket: any = {
           Websocket.reconnect_current = 1;
           Websocket.reconnect_timer = null;
           Websocket.notification["success"]({
-            content: "连接成功",
-            meta: "推荐使用Microsoft Edge浏览器,谷歌浏览器限制过多!",
+            content: "连接服务器成功",
+            meta: "推荐使用Microsoft Edge浏览器进行操作。",
             duration: 3000,
             keepAliveOnHover: true,
           });
           break;
         case gameEnum.ServerMessageSuccessType:
           let serverInfo = JSON.parse(data.data);
-          //如果返回状态为 true 或 全局isAutomatic 为 false
-          if (!serverInfo.status || !globalStore.isAutomatic) return;
-          const aLink = document.createElement("a");
+          //重新设置全局挤服对象人数信息
+          globalStore.automaticInfo.players = serverInfo.players;
+          globalStore.automaticInfo.maxPlayers = serverInfo.maxPlayers;
+          //全局isAutomatic 为 false
+          if (!globalStore.isAutomatic) return;
+          //如果返回状态为 true 则继续挤服
+          if (!serverInfo.status) {
+            globalStore.automaticCount++;
+            Websocket.sendMessage(globalStore.automaticInfo);
+            return;
+          }
+          //清空数据
           globalStore.isAutomatic = false;
+          globalStore.automaticCount = 0;
+          const aLink = document.createElement("a");
           aLink.href =
             "steam://rungame/730/76561198977557298/+connect " +
             serverInfo.ip +
@@ -70,10 +81,13 @@ const Websocket: any = {
           aLink.click();
           //发送消息
           Websocket.notification["success"]({
-            content: "挤服成功",
+            content: "连接成功",
             duration: 3000,
             keepAliveOnHover: true,
           });
+        case gameEnum.MessageFailType:
+          //避免消息失败导致挤服生效
+          Websocket.sendMessage(globalStore.automaticInfo);
           break;
         default:
           break;
@@ -91,13 +105,14 @@ const Websocket: any = {
               meta: "聊天室连接失败",
               keepAliveOnHover: true,
             });
+            Websocket.websocket = null;
             clearInterval(Websocket.reconnect_timer);
             return;
           }
           // 记录重连次数
           Websocket.reconnect_current++;
           // 创建连接
-          Websocket.reconnect(true);
+          Websocket.reconnect();
         }, Websocket.reconnect_interval);
       }
     };

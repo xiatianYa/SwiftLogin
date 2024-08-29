@@ -28,27 +28,37 @@
         <!-- 表格 -->
         <div>
             <n-spin :show="loading" :size="'large'" style="min-height: 50vh;">
-                <reuseTable :tableColumns="serverColumns" :tableData="serverData" v-show="!loading" />
+                <reuseTable :tableColumns="serverColumns" :tableData="serverData" :rowClassName="rowClassName"
+                    v-show="!loading" />
                 <template #description>
                     加载中,请耐心等待...
                 </template>
             </n-spin>
         </div>
         <!-- 自动挤服 / 挂机模式 抽屉 -->
-        <n-drawer v-model:show="automaticDialog" :width="502" placement="right">
-            <n-drawer-content :title="serverInfo.name">
+        <n-drawer v-model:show="automaticDialog" :width="502" placement="right" :on-after-leave="handleDrawerClose">
+            <n-drawer-content :title="globalStore.automaticInfo.name" closable>
                 <n-card :bordered="false">
                     <n-space class="mb-10">
                         <span>
-                            地图名称 : {{ serverInfo.map }}
+                            地图名称 : {{ globalStore.automaticInfo.map }}
                         </span>
                         <span>
-                            译名 : {{ serverInfo.mapName }}
+                            译名 : {{ globalStore.automaticInfo.mapName }}
                         </span>
                     </n-space>
+                    <n-space class="mb-10 d_flex_ac d_flex_sb">
+                        <n-image width="240" height="100%" :src="globalStore.automaticInfo.mapUrl"
+                            v-if="globalStore.automaticInfo.mapUrl" />
+                        <n-progress type="circle"
+                            :color="getProgressColor(((globalStore.automaticInfo.players / globalStore.automaticInfo.maxPlayers) * 100))"
+                            :percentage="((globalStore.automaticInfo.players / globalStore.automaticInfo.maxPlayers) * 100)">
+                            <span style="font-weight: 700;">当前在线人数:{{ globalStore.automaticInfo.players }}</span>
+                        </n-progress>
+                    </n-space>
                     <n-space class="mb-10" vertical>
-                        <n-input-number class="mb-5" v-model:value="automaticPersonnelNumber"
-                            :disabled="automaticInterval || automaticPersonnel || automaticMap"
+                        <n-input-number class="mb-5" v-model:value="globalStore.automaticInfo.minPlayers"
+                            :disabled="globalStore.isAutomatic || globalStore.isAutoHook"
                             placeholder="最小玩家数 (小于或于时自动进入服务器)" :min="0" clearable>
                             <template #minus-icon>
                                 <n-icon :component="ArrowDownCircleOutline" />
@@ -57,8 +67,8 @@
                                 <n-icon :component="ArrowUpCircleOutline" />
                             </template>
                         </n-input-number>
-                        <n-input-number class="mb-5" v-model:value="automaticIntervalNumber"
-                            :disabled="automaticInterval || automaticPersonnel || automaticMap"
+                        <n-input-number class="mb-5" v-model:value="globalStore.automaticInfo.automaticIntervalNumber"
+                            :disabled="globalStore.isAutomatic || globalStore.isAutoHook"
                             placeholder="挂机间隔 (每隔多少分钟重新进入服务器)" :min="1" clearable>
                             <template #minus-icon>
                                 <n-icon :component="ArrowDownCircleOutline" />
@@ -73,9 +83,8 @@
                             <span class="mr-5">
                                 自动挤服
                             </span>
-                            <n-switch v-model:value="automaticPersonnel" size="large"
-                                :disabled="automaticInterval || automaticMap"
-                                :on-update:value="handleAutomaticPersonnel">
+                            <n-switch v-model:value="globalStore.isAutomatic" size="large"
+                                :disabled="globalStore.isAutoHook" :on-update:value="handleAutomaticPersonnel">
                                 <template #checked-icon>
                                     <n-icon :component="CaretBackCircleOutline" />
                                 </template>
@@ -88,9 +97,8 @@
                             <span class="mr-5">
                                 自动挂机
                             </span>
-                            <n-switch v-model:value="automaticInterval" size="large"
-                                :disabled="automaticPersonnel || automaticMap"
-                                :on-update:value="handleAutomaticInterval">
+                            <n-switch v-model:value="globalStore.isAutoHook" size="large"
+                                :disabled="globalStore.isAutomatic" :on-update:value="handleAutomaticInterval">
                                 <template #checked-icon>
                                     <n-icon :component="CaretBackCircleOutline" />
                                 </template>
@@ -126,31 +134,53 @@
                     </n-space>
                     <n-space class="mt-10">
                         <span>
-                            尝试次数 : {{ automaticNumber }}
+                            尝试次数 : {{ globalStore.automaticCount }}
                         </span>
                         <span>
-                            挂机次数 : {{ onHookNumber }}
+                            挂机次数 : {{ globalStore.onHookNumber }}
                         </span>
                     </n-space>
                 </n-card>
             </n-drawer-content>
         </n-drawer>
         <!-- 地图订阅 -->
-        <n-drawer v-model:show="mapDialog" :width="502" placement="right">
-            <n-drawer-content title="地图订阅">
+        <n-drawer v-model:show="mapDialog" :width="502" placement="right" :on-after-leave="handleDrawerClose">
+            <n-drawer-content title="地图订阅" closable>
                 <n-card :bordered="false">
                     <n-space vertical class="mb-10">
-                        <n-select v-model:value="subscriptionMap" filterable placeholder="选择地图"
-                            :disabled="automaticInterval || automaticPersonnel || automaticMap"
-                            :options="selectOption.map" clearable />
+                        <n-select :value="globalStore.autoMapInfo?.label || null" filterable placeholder="选择地图"
+                            :disabled="globalStore.isAutoMap" :options="selectOption.map"
+                            @update:value="handleUpdateMapValue" clearable />
                     </n-space>
-                    <n-space class="mb-10">
+                    <n-space>
+                        <div class="d_flex" v-if="globalStore.autoMapInfo">
+                            <n-image width="220" height="100%" class="mr-5" :src="globalStore.autoMapInfo.mapUrl"
+                                v-if="globalStore.autoMapInfo.mapUrl" />
+                            <div>
+                                <div>
+                                    地图名 : {{ globalStore.autoMapInfo.value }}
+                                </div>
+                                <div class="mt-5">
+                                    地图译名 :{{ globalStore.autoMapInfo.label }}
+                                </div>
+                                <div class="mt-5">
+                                    <n-tag :color="renderColor(globalStore.autoMapInfo.typeName)" size="small"
+                                        class="mr-5">{{
+                                            globalStore.autoMapInfo.typeName }}</n-tag>
+                                    <n-tag size="small" type="success" class="mr-5"
+                                        v-for="item in globalStore.autoMapInfo?.tagName?.split(',').filter((item: any) => item != null && item != '')">{{
+                                            item }}</n-tag>
+                                </div>
+                            </div>
+                        </div>
+                    </n-space>
+                    <n-space class="mt-5">
                         <div class="d_flex_ac">
                             <span class="mr-5">
                                 地图订阅
                             </span>
-                            <n-switch v-model:value="automaticMap" size="large"
-                                :disabled="automaticInterval || automaticPersonnel" :on-update:value="handleAutoMap">
+                            <n-switch v-model:value="globalStore.isAutoMap" size="large"
+                                :on-update:value="handleAutomaticMap">
                                 <template #checked-icon>
                                     <n-icon :component="CaretBackCircleOutline" />
                                 </template>
@@ -172,6 +202,7 @@
                                     配置要点：<br>
                                     仅需选择“地图”即可启用此功能。<br>
                                     需要浏览器通知权限(重点),推荐默认允许打开!<br>
+                                    只能订阅你目前勾选的社区进行订阅(页面所展示的服务器)!<br>
                                 </span>
                             </n-popover>
                         </div>
@@ -194,8 +225,9 @@ import { getServerInfo } from '@/api/steamApi'
 import { CustomType } from "@/types";
 import type { Component } from 'vue'
 import { ref, h, onMounted, watch } from 'vue';
-import { NSelect, NButton, NIcon, NImage, NSpin, useNotification, NDrawer, NDrawerContent, NCard, NSpace, NSwitch, NInputNumber, NStatistic, NNumberAnimation, NPopover, useMessage, NTag } from 'naive-ui';
+import { NSelect, NButton, NIcon, NImage, NSpin, NProgress, useNotification, NDrawer, NDrawerContent, NCard, NSpace, NSwitch, NInputNumber, NStatistic, NNumberAnimation, NPopover, useMessage, NTag, SelectOption } from 'naive-ui';
 import { Search, AlarmOutline, MapOutline, CopyOutline, EnterOutline, ArrowDownCircleOutline, ArrowUpCircleOutline, CaretForwardCircleOutline, CaretBackCircleOutline, InformationCircleOutline } from '@vicons/ionicons5';
+import { RowData } from 'naive-ui/es/data-table/src/interface';
 
 //全局仓库
 let { globalStore } = useStore();
@@ -206,10 +238,10 @@ const message = useMessage()
 //消息弹出框
 const notification = useNotification()
 
-//在线人数
+//统计在线人数
 const playNumber = ref(0)
 
-//最大人数
+//统计最大人数
 const maxPlayNumber = ref(0)
 
 //自动挤服 / 挂机模式 抽屉
@@ -217,33 +249,6 @@ const automaticDialog = ref(false)
 
 //地图订阅 抽屉
 const mapDialog = ref(false)
-
-//当前挤服的服务器信息
-const serverInfo = ref<any>({})
-
-//自动挤服按键
-const automaticPersonnel = ref(false)
-
-//自动挂机按键
-const automaticInterval = ref(false)
-
-//自动订阅地图按钮
-const automaticMap = ref(false)
-
-//地图订阅名称
-const subscriptionMap = ref(null)
-
-//自动挤服尝试次数 
-const automaticNumber = ref(0)
-
-//自动挂机次数 
-const onHookNumber = ref(0)
-
-//玩家数(在玩家与小于或等于的情况下)
-const automaticPersonnelNumber = ref(null)
-
-//挂机间隔(分钟)
-const automaticIntervalNumber = ref(null)
 
 //数据是否加载
 const loading = ref(false)
@@ -258,9 +263,6 @@ const queryParams = ref<any>({
 
 //服务器信息定时任务
 const getServerInterval = ref()
-
-//自动挤服定时任务
-const getAutomaticInterval = ref()
 
 //挂机模式定时任务
 const getOnHookInterval = ref()
@@ -284,7 +286,7 @@ const selectOption = ref<CustomType>({
 const serverColumns = ref([
     {
         type: 'expand',
-        expandable: (rowData: any) => rowData.peopleNumber !== '获取失败!' && rowData.mapName !== '暂无译名',
+        expandable: (rowData: any) => rowData.players !== '获取失败!' && rowData.mapName !== '暂无译名',
         renderExpand: (rowData: any) => {
             return h('div', [
                 h('div', {
@@ -396,7 +398,16 @@ const serverColumns = ref([
     },
     {
         title: '人数',
-        key: 'peopleNumber'
+        key: 'peopleNumber',
+        render(row: any) {
+            return h(
+                'span',
+                {
+
+                },
+                { default: () => row.players + "/" + row.maxPlayers }
+            )
+        }
     },
     {
         title: '操作',
@@ -450,8 +461,90 @@ const serverColumns = ref([
     }
 ])
 
-//开启地图订阅
+//开启自动挤服
+const handleAutomaticPersonnel = (value: boolean) => {
+    //关闭挤服
+    if (!value) {
+        //清除挤服次数
+        globalStore.automaticCount = 0;
+        globalStore.isAutomatic = value;
+        return;
+    }
+    //未填写挤服人数
+    if (!globalStore.automaticInfo.minPlayers) {
+        message.warning("请填最小玩家数!")
+        return;
+    }
+    //发送消息 开始主动挤服
+    globalStore.isAutomatic = value;
+    gameSocket.sendMessage(globalStore.automaticInfo);
+}
+
+//开启自动挂机
+const handleAutomaticInterval = (value: boolean) => {
+    //关闭主动挂机
+    if (!value) {
+        //清除挤服次数
+        globalStore.onHookNumber = 0;
+        globalStore.automaticCount = 0;
+        globalStore.isAutoHook = value;
+        //清空定时任务
+        clearInterval(getOnHookInterval.value);
+        return;
+    }
+    //未填写挤服人数
+    if (!globalStore.automaticInfo.minPlayers) {
+        message.warning("请填最小玩家数!");
+        return;
+    }
+    //为填写挂机间隔
+    if (!globalStore.automaticInfo.automaticIntervalNumber) {
+        message.warning("请填写挂机间隔!");
+        return;
+    }
+    //开启 挂机定时任务
+    globalStore.isAutoHook = value;
+    getOnHookInterval.value = setInterval(async () => {
+        //设置全局挤服
+        globalStore.isAutomatic = true;
+        globalStore.onHookNumber++;
+        //开始挤服
+        gameSocket.sendMessage(globalStore.automaticInfo);
+    }, globalStore.automaticInfo.automaticIntervalNumber * 60000);
+}
+
+//开启/关闭 自动订阅地图
+const handleAutomaticMap = (value: boolean) => {
+    if (!globalStore.autoMapInfo) {
+        message.warning('请选择订阅地图')
+        return;
+    }
+    if (value) {
+        message.success("地图订阅已开启")
+    } else {
+        message.info("地图订阅已关闭")
+    }
+    globalStore.isAutoMap = value;
+}
+
+//抽屉关闭的回调函数
+const handleDrawerClose = () => {
+    //清空 关闭 各种定时任务 数据
+    globalStore.initGlobal();
+}
+
+//选择地图订阅
+const handleUpdateMapValue = (_value: string, option: SelectOption) => {
+    globalStore.autoMapInfo = JSON.parse(JSON.stringify(option))
+}
+
+//打开地图订阅
 const onMap = () => {
+    //Websocket不存在
+    if (!gameSocket.websocket) {
+        message.error('服务器连接失败,请刷新页面!')
+        return;
+    };
     mapDialog.value = true;
 }
 
@@ -463,97 +556,20 @@ const onSearch = () => {
 //改变配置自动搜索
 const handleUpdateValue = () => {
     //避免bug 清除定时器任务
-    if (getServerInterval.value) {
-        clearInterval(getServerInterval.value);
-        getServerInterval.value = null; // 可选，但有助于避免潜在的bug  
-    }
+    clearInterval(getServerInterval.value);
+    getServerInterval.value = null; // 可选，但有助于避免潜在的bug  
     onSearch();
 }
 
-//自动挤服 / 挂机模式
+//打开 自动挤服 / 挂机模式
 const onAutomatic = (row: any) => {
     //Websocket不存在
     if (!gameSocket.websocket) {
-        message.warning('服务器连接失败,请刷新页面!')
+        message.error('服务器连接失败,请刷新页面!')
+        return;
     };
-    serverInfo.value = row;
+    globalStore.automaticInfo = row;
     automaticDialog.value = true;
-}
-
-//开启/关闭自动挤服
-const handleAutomaticPersonnel = (value: boolean) => {
-    //判断是否关闭
-    if (!value) {
-        closeAutomatic()
-    }
-    automaticNumber.value = 0;
-    //校验参数 自动挤服配置人数未填写
-    if (!automaticPersonnelNumber.value) {
-        message.warning('请填写(最小玩家数)')
-        return;
-    }
-    automaticPersonnel.value = value;
-    //定时任务关闭 或 全局isAutomatic 为 false
-    if (!automaticPersonnel.value) {
-        closeAutomatic()
-        return;
-    }
-    //当前挤服任务还存在 则退出
-    if (getAutomaticInterval.value) return;
-    //设置全局挤服
-    globalStore.isAutomatic = true;
-    let { ip, port } = serverInfo.value;
-    startAutomaticInterval(ip, port, 120);
-}
-
-//开启/关闭自动挂机
-const handleAutomaticInterval = (value: boolean) => {
-    //判断是否关闭
-    if (!value) {
-        closeOnHook()
-        return;
-    }
-    if (!automaticPersonnelNumber.value) {
-        message.warning('请填写(最小玩家数)')
-        return;
-    }
-    if (!automaticIntervalNumber.value) {
-        message.warning('请填写(挂机间隔)')
-        return;
-    }
-    let { ip, port } = serverInfo.value;
-    startonHookAutomaticInterval(ip, port, automaticIntervalNumber.value * 60000);
-    automaticInterval.value = value;
-}
-
-//开启/关闭 自动订阅地图
-const handleAutoMap = (value: boolean) => {
-    if (!subscriptionMap.value) {
-        message.warning('请选择订阅地图')
-        return;
-    }
-    automaticMap.value = value;
-}
-
-//关闭自动挤服任务
-const closeAutomatic = () => {
-    //清空定任务
-    clearInterval(getAutomaticInterval.value);
-    getAutomaticInterval.value = null;
-    //清空挤服次数
-    automaticNumber.value = 0;
-    //初始化按钮
-    automaticPersonnel.value = false;
-}
-
-//关闭挂机模式任务
-const closeOnHook = () => {
-    automaticInterval.value = false;
-    //清空定时任务
-    clearInterval(getOnHookInterval.value);
-    getOnHookInterval.value = null;
-    clearInterval(getAutomaticInterval.value)
-    getAutomaticInterval.value = null;
 }
 
 //连接服务器
@@ -643,37 +659,21 @@ const renderColor = (typeName: string) => {
     }
 }
 
-//开启挤服定时任务 ip:服务器ip port:服务器端口 time:挤服间隔
-const startAutomaticInterval = (ip: string, port: number, time: number) => {
-    //开启 定时任务
-    getAutomaticInterval.value = setInterval(async () => {
-        if (!globalStore.isAutomatic) {
-            closeAutomatic()
-            return;
-        }
-        gameSocket.sendMessage({ ip, port, minPlayers: automaticPersonnelNumber.value })
-        //挤服次数++
-        automaticNumber.value++;
-    }, time);
-}
-
-//开启挂机定时任务 ip:服务器ip port:服务器端口 time:挤服间隔
-const startonHookAutomaticInterval = (ip: string, port: number, time: number) => {
-    //开启 挂机定时任务
-    getOnHookInterval.value = setInterval(async () => {
-        //设置全局挤服
-        globalStore.isAutomatic = true;
-        //当前挤服任务还存在 则退出
-        if (getAutomaticInterval.value) return;
-        //开始挤服
-        startAutomaticInterval(ip, port, 120);
-        //挂机进服次数++
-        onHookNumber.value++;
-    }, time);
+//计算进度颜色
+const getProgressColor = (progress: any) => {
+    if (progress <= 30) {
+        return '#2fef10';
+    } else if (progress <= 50) {
+        return '#a9f604'
+    } else if (progress <= 80) {
+        return '#ff4f00'
+    } else {
+        return '#ff0000'
+    }
 }
 
 //自动获取列表服务器信息
-const startInterval = (paths: Array<string>) => {
+const startInterval = () => {
     //开启定时任务 持续获取服务器信息
     getServerInterval.value = setInterval(async () => {
         //获取所有服务器
@@ -683,7 +683,8 @@ const startInterval = (paths: Array<string>) => {
                 ...item,
                 map: "获取失败!",
                 mapName: "获取失败",
-                peopleNumber: "获取失败!"
+                players: 0,
+                maxPlayers: 0
             }
         })
         //处理服务器路径参数
@@ -706,7 +707,8 @@ const startInterval = (paths: Array<string>) => {
             serverInfo = serverResult.find((item: any) => item.ip + ":" + item.port == addr);
             serverInfo.key = serverInfo.id;
             serverInfo.map = map;
-            serverInfo.peopleNumber = players + "/" + max_players;
+            serverInfo.players = players;
+            serverInfo.maxPlayers = max_players;
             //获取地图译名
             let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
             serverInfo.mapUrl = mapName?.mapUrl ? mapName.mapUrl : "";
@@ -776,7 +778,8 @@ const init = async () => {
             ...item,
             map: "获取失败!",
             mapName: "获取失败",
-            peopleNumber: "获取失败!"
+            players: 0,
+            maxPlayers: 0
         }
     })
     //处理服务器路径参数
@@ -799,7 +802,8 @@ const init = async () => {
         serverInfo = serverResult.find((item: any) => item.ip + ":" + item.port == addr);
         serverInfo.key = serverInfo.id;
         serverInfo.map = map;
-        serverInfo.peopleNumber = players + "/" + max_players;
+        serverInfo.players = players;
+        serverInfo.maxPlayers = max_players;
         //获取地图译名
         let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
         serverInfo.mapUrl = mapName?.mapUrl ? mapName.mapUrl : "";
@@ -812,50 +816,67 @@ const init = async () => {
     })
     serverData.value = serverResult;
     //开启定时任务
-    startInterval(paths);
+    startInterval();
     loading.value = false;
 }
+
+//表格自定义样式
+const rowClassName = (row: RowData) => {
+    if (!row.players && !row.maxPlayers) {
+        return 'too-old'
+    }
+    return '';
+}
+
+//地图数据接听
 watch(() => serverData.value, (newValue: any, oldValue: any) => {
-    if (automaticMap.value && subscriptionMap.value) {
-        newValue.map((item: any) => {
-            if (item.map === subscriptionMap.value) {
-                // 判断浏览器是否支持唤醒
-                if (window.Notification) {
-                    let popNotice = () => {
-                        const notification = new Notification('地图订阅通知', {
-                            body: "您所订阅的地图 " + subscriptionMap.value + " 已在 " + item.name + " 成功启动，并已自动为您开始挤服。"
-                        })
-                        // 点击通知的回调函数
-                        notification.onclick = function () {
-                            window.open('https://www.bluearchive.top')
-                            notification.close()
-                        }
-                    }
-                    /* 授权过通知 */
-                    if (Notification.permission === 'granted') {
-                        popNotice()
-                    } else {
-                        /* 未授权，先询问授权 */
-                        Notification.requestPermission(function (permission) {
-                            popNotice()
-                        })
+    //当地图订阅开启
+    if (globalStore.isAutoMap && globalStore.autoMapInfo) {
+        let mapResult = newValue.find((item: any) => item.map = globalStore.autoMapInfo.value)
+        if (mapResult) {
+            //清空自动挤服
+            globalStore.isAutoMap = false;
+            mapDialog.value = false;
+            globalStore.autoMapInfo = null;
+            // 判断浏览器是否支持唤醒
+            if (window.Notification) {
+                let popNotice = () => {
+                    const notification = new Notification('地图订阅通知', {
+                        body: "您所订阅的地图 " + mapResult.mapName + " 已在 " + mapResult.name + " 进行游戏,已为你自动连接服务器。"
+                    })
+                    // 点击通知的回调函数
+                    notification.onclick = () => {
+                        window.open('https://www.bluearchive.top')
+                        notification.close()
                     }
                 }
-                // 自动连接服务器
-                const aLink = document.createElement("a");
-                aLink.href =
-                    "steam://rungame/730/76561198977557298/+connect " +
-                    item.ip +
-                    ":" +
-                    item.port;
-                aLink.click();
-                //清空自动挤服
-                automaticMap.value = false;
-                subscriptionMap.value = null;
+                /* 授权过通知 */
+                if (Notification.permission === 'granted') {
+                    popNotice()
+                } else {
+                    /* 未授权，先询问授权 */
+                    Notification.requestPermission(() => {
+                        popNotice()
+                    })
+                }
             }
-        })
+            // 自动连接服务器
+            const aLink = document.createElement("a");
+            aLink.href =
+                "steam://rungame/730/76561198977557298/+connect " +
+                mapResult.ip +
+                ":" +
+                mapResult.port;
+            aLink.click();
+        }
+    }
+    //当打开抽屉地图信息时 
+    if (globalStore.automaticInfo) {
+        let mapResult = newValue.find((item: any) => item.map == globalStore.automaticInfo.map)
+        globalStore.automaticInfo = { ...globalStore.automaticInfo, ...mapResult }
     }
 }, { deep: true })
+
 onMounted(async () => {
     //加载开启
     loading.value = true;
@@ -871,6 +892,10 @@ onMounted(async () => {
     .title {
         font-size: 16px;
         font-weight: bolder
+    }
+
+    :deep(.too-old td) {
+        color: rgba(230, 71, 74, 1) !important;
     }
 }
 </style>

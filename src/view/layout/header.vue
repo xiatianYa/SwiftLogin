@@ -15,7 +15,6 @@
                             🌝
                         </template>
                     </n-switch>
-
                 </n-space>
             </template>
         </n-split>
@@ -35,7 +34,6 @@ import {
     BriefcaseOutline as BriefcaseIcon,
     ChatboxEllipsesOutline as ChatIcon,
     MapOutline as MapIcon,
-    VideocamOutline as VideocamIcon,
     PeopleCircleOutline as PeopleCircleIcon,
 } from '@vicons/ionicons5'
 
