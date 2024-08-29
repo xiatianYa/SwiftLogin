@@ -16,11 +16,11 @@ import { onMounted } from "vue";
 const { notification } = createDiscreteApi(["notification"]);
 onMounted(() => {
     //通知
-    notification["warning"]({
-        content: "更新通知",
-        meta: "网页版本登录器将于2024/08/25 15:30进行功能更新,大概在2024/08/25 17:00更新完成,问题反馈请加QQ群",
-        keepAliveOnHover: true,
-    });
+    // notification["warning"]({
+    //     content: "更新通知",
+    //     meta: "网页版本登录器将于2024/08/25 15:30进行功能更新,大概在2024/08/25 17:00更新完成,问题反馈请加QQ群",
+    //     keepAliveOnHover: true,
+    // });
 })
 </script>
 
