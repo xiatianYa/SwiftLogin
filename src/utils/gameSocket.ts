@@ -89,6 +89,9 @@ const Websocket: any = {
           //避免消息失败导致挤服生效
           Websocket.sendMessage(globalStore.automaticInfo);
           break;
+        case gameEnum.ServerPushServerDataType:
+          globalStore.serverInfo = new Map(Object.entries(JSON.parse(data.data)));
+          break;
         default:
           break;
       }

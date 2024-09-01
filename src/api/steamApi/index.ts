@@ -1,12 +1,12 @@
 import request from "@/utils/request";
 
 // 查询服务器列表
-export function getServerInfo(paths: Array<string>) {
-  const queryString = paths
-    .map((path) => `paths=${encodeURIComponent(path)}`)
-    .join("&");
+export function getServerInfo(countryId: string) {
   return request({
-    url: `/blog/server/steamApi/?${queryString}`,
+    url: `/blog/server/steamApi/?${countryId}`,
     method: "get",
+    params:{
+      countryId
+    }
   });
 }

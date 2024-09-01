@@ -11,5 +11,7 @@ enum chatEnum {
   MessageFailType = 205,
   //服务器挤服消息
   ServerMessageSuccessType = 206,
+  //服务器推送服务器信息
+  ServerPushServerDataType = 207,
 }
 export default chatEnum;

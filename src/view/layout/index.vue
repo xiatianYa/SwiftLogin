@@ -18,11 +18,11 @@ let { globalStore } = useStore()
 const { notification } = createDiscreteApi(["notification"]);
 onMounted(() => {
     //通知
-    // notification["warning"]({
-    //     content: "更新通知",
-    //     meta: "网页版本登录器将于2024/08/25 15:30进行功能更新,大概在2024/08/25 17:00更新完成,问题反馈请加QQ群",
-    //     keepAliveOnHover: true,
-    // });
+    notification["warning"]({
+        content: "更新通知",
+        meta: "网页版本登录器将于2024/9/01 13:00:00 -> 2024/09/01 15:30:00 预计更新完成,问题反馈请加QQ群901243791",
+        keepAliveOnHover: true,
+    });
     globalStore.initSocket()
 })
 </script>

@@ -18,6 +18,8 @@ export interface Global {
   onHookNumber: number;
   //白天 黑夜模式
   nightCycle: boolean;
+  //服务器推送ws数据
+  serverInfo: any;
 }
 export const useGloBalStore = defineStore("global", {
   // 真正存储数据的地方
@@ -32,6 +34,7 @@ export const useGloBalStore = defineStore("global", {
       automaticCount: 0,
       onHookNumber: 0,
       nightCycle: stringToBoolean(localStorage.getItem("nightCycle")),
+      serverInfo: null,
     };
   },
   actions: {

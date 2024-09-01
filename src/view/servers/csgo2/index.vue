@@ -5,7 +5,7 @@
         <div class="d_flex_ac d_flex_sb mb-20">
             <div class="title">服务器列表</div>
             <n-statistic label="在线人数" :tabular-nums="true">
-                <n-number-animation ref="numberAnimationInstRef" :from="0" :to="playNumber" :duration="1000" />
+                <n-number-animation ref="numberAnimationInstRef" :from="0" :to="playNumber" :duration="500" />
                 <template #suffix>
                     / {{ maxPlayNumber }}
                 </template>
@@ -270,6 +270,9 @@ const getOnHookInterval = ref()
 //服务器表格数据
 const serverData = ref<any>([])
 
+//服务器列表
+const serverList = ref<any>([])
+
 //select配置项
 const selectOption = ref<CustomType>({
     //社区列表
@@ -286,7 +289,7 @@ const selectOption = ref<CustomType>({
 const serverColumns = ref([
     {
         type: 'expand',
-        expandable: (rowData: any) => rowData.players !== '获取失败!' && rowData.mapName !== '暂无译名',
+        expandable: (rowData: any) => rowData.maxPlayers && rowData.mapName !== '暂无译名',
         renderExpand: (rowData: any) => {
             return h('div', [
                 h('div', {
@@ -672,57 +675,6 @@ const getProgressColor = (progress: any) => {
     }
 }
 
-//自动获取列表服务器信息
-const startInterval = () => {
-    //开启定时任务 持续获取服务器信息
-    getServerInterval.value = setInterval(async () => {
-        //获取所有服务器
-        let serverResult: any = await listServer(queryParams.value)
-        serverResult = serverResult.rows.map((item: any) => {
-            return {
-                ...item,
-                map: "获取失败!",
-                mapName: "获取失败",
-                players: 0,
-                maxPlayers: 0
-            }
-        })
-        //处理服务器路径参数
-        let paths = serverResult.map((item: any) => {
-            let { ip, port } = item;
-            return ip + ":" + port
-        })
-
-        //初始化服务器参数
-        let responsePromise: any = await getServerInfo(paths);
-
-        playNumber.value = 0;
-        maxPlayNumber.value = 0;
-        responsePromise.map((item: any) => {
-            //获取服务器信息
-            let serverInfo = item.response.servers
-            if (!serverInfo) return;
-            //获取服务器地址 地图名 在线玩家 最大玩家
-            let { addr, map, players, max_players } = serverInfo[0]
-            serverInfo = serverResult.find((item: any) => item.ip + ":" + item.port == addr);
-            serverInfo.key = serverInfo.id;
-            serverInfo.map = map;
-            serverInfo.players = players;
-            serverInfo.maxPlayers = max_players;
-            //获取地图译名
-            let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
-            serverInfo.mapUrl = mapName?.mapUrl ? mapName.mapUrl : "";
-            serverInfo.tagName = mapName?.tagName ? mapName.tagName : "";
-            serverInfo.typeName = mapName ? mapName.typeName : '';
-            serverInfo.mapName = mapName ? mapName.label : '暂无译名';
-            //配置表头在线人数
-            playNumber.value += players;
-            maxPlayNumber.value += max_players;
-        })
-        serverData.value = serverResult;
-    }, 6000); // 每6秒执行一次  
-}
-
 //配置项初始化
 const optionInit = async () => {
     //获取所有游戏社区
@@ -759,6 +711,7 @@ const optionInit = async () => {
         value: key,
         label: value
     }));
+
     if (localStorage.getItem("community")) {
         queryParams.value.communityId = Number(localStorage.getItem("community"))
 
@@ -772,8 +725,8 @@ const optionInit = async () => {
 const init = async () => {
     loading.value = true;
     //获取所有服务器
-    let serverResult: any = await listServer(queryParams.value)
-    serverResult = serverResult.rows.map((item: any) => {
+    serverList.value = await listServer(queryParams.value)
+    let serverResult = serverList.value.rows.map((item: any) => {
         return {
             ...item,
             map: "获取失败!",
@@ -782,14 +735,9 @@ const init = async () => {
             maxPlayers: 0
         }
     })
-    //处理服务器路径参数
-    let paths = serverResult.map((item: any) => {
-        let { ip, port } = item;
-        return ip + ":" + port
-    })
 
     //初始化服务器参数
-    let responsePromise: any = await getServerInfo(paths);
+    let responsePromise: any = await getServerInfo(queryParams.value.communityId);
 
     playNumber.value = 0;
     maxPlayNumber.value = 0;
@@ -800,23 +748,23 @@ const init = async () => {
         //获取服务器地址 地图名 在线玩家 最大玩家
         let { addr, map, players, max_players } = serverInfo[0]
         serverInfo = serverResult.find((item: any) => item.ip + ":" + item.port == addr);
-        serverInfo.key = serverInfo.id;
-        serverInfo.map = map;
-        serverInfo.players = players;
-        serverInfo.maxPlayers = max_players;
-        //获取地图译名
-        let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
-        serverInfo.mapUrl = mapName?.mapUrl ? mapName.mapUrl : "";
-        serverInfo.tagName = mapName?.tagName ? mapName.tagName : "";
-        serverInfo.typeName = mapName ? mapName.typeName : '';
-        serverInfo.mapName = mapName ? mapName.label : '暂无译名';
-        //配置表头在线人数
-        playNumber.value += players;
-        maxPlayNumber.value += max_players;
+        if (serverInfo) {
+            serverInfo.key = serverInfo.id;
+            serverInfo.map = map;
+            serverInfo.players = players;
+            serverInfo.maxPlayers = max_players;
+            //获取地图译名
+            let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
+            serverInfo.mapUrl = mapName?.mapUrl ? mapName.mapUrl : "";
+            serverInfo.tagName = mapName?.tagName ? mapName.tagName : "";
+            serverInfo.typeName = mapName ? mapName.typeName : '';
+            serverInfo.mapName = mapName ? mapName.label : '暂无译名';
+            //配置表头在线人数
+            playNumber.value += players;
+            maxPlayNumber.value += max_players;
+        }
     })
     serverData.value = serverResult;
-    //开启定时任务
-    startInterval();
     loading.value = false;
 }
 
@@ -874,7 +822,54 @@ watch(() => serverData.value, (newValue: any, oldValue: any) => {
     if (globalStore.automaticInfo) {
         let mapResult = newValue.find((item: any) => item.map == globalStore.automaticInfo.map)
         globalStore.automaticInfo = { ...globalStore.automaticInfo, ...mapResult }
+        console.log(globalStore.automaticInfo);
+
     }
+}, { deep: true })
+
+watch(() => globalStore.serverInfo, async (newValue: any, oldValue: any) => {
+    if (!newValue || !serverList.value) {
+        return;
+    }
+    //获取所有服务器
+    let serverResult = serverList.value.rows.map((item: any) => {
+        return {
+            ...item,
+            map: "获取失败!",
+            mapName: "获取失败",
+            players: 0,
+            maxPlayers: 0
+        }
+    })
+    //初始化服务器参数
+    let responsePromise: any = JSON.parse(newValue.get(String(queryParams.value.communityId)));
+
+    playNumber.value = 0;
+    maxPlayNumber.value = 0;
+    responsePromise.map((item: any) => {
+        //获取服务器信息
+        let serverInfo = item.response.servers
+        if (!serverInfo) return;
+        //获取服务器地址 地图名 在线玩家 最大玩家
+        let { addr, map, players, max_players } = serverInfo[0]
+        serverInfo = serverResult.find((item: any) => item.ip + ":" + item.port == addr);
+        if (serverInfo) {
+            serverInfo.key = serverInfo.id;
+            serverInfo.map = map;
+            serverInfo.players = players;
+            serverInfo.maxPlayers = max_players;
+            //获取地图译名
+            let mapName = selectOption.value.map.find((item: any) => item.value == serverInfo.map);
+            serverInfo.mapUrl = mapName?.mapUrl ? mapName.mapUrl : "";
+            serverInfo.tagName = mapName?.tagName ? mapName.tagName : "";
+            serverInfo.typeName = mapName ? mapName.typeName : '';
+            serverInfo.mapName = mapName ? mapName.label : '暂无译名';
+            //配置表头在线人数
+            playNumber.value += players;
+            maxPlayNumber.value += max_players;
+        }
+    })
+    serverData.value = serverResult;
 }, { deep: true })
 
 onMounted(async () => {
