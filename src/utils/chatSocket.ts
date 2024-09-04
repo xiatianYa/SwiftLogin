@@ -1,7 +1,8 @@
-let wsUrl = "wss://www.bluearchive.top:9207/gameServer";
-import gameEnum from "./gameEnum";
+let wsUrl = "wss://bluearchive.top:9207/server/";
 import useStore from "@/store";
+import chatEnum from "@/utils/chatEnum";
 import { createDiscreteApi } from "naive-ui";
+import { getUserList } from "@/api/chat";
 const Websocket: any = {
   websocket: null,
   //连接地址
@@ -21,7 +22,7 @@ const Websocket: any = {
   // 建立websocket连接
   init: () => {
     //全局仓库
-    let { globalStore } = useStore();
+    let { globalStore, userStore } = useStore();
     //初始化消息对象
     const { notification } = createDiscreteApi(["notification"]);
     Websocket.notification = notification;
@@ -35,67 +36,55 @@ const Websocket: any = {
       });
       return;
     }
+    if (!userStore.token) {
+      Websocket.notification["error"]({
+        content: "认证失败",
+        meta: "Token不存在",
+        duration: 2500,
+        keepAliveOnHover: true,
+      });
+      return;
+    }
     //建立websocket连接
-    Websocket.websocket = new WebSocket(wsUrl);
+    Websocket.websocket = new WebSocket(wsUrl + userStore.token);
     // 监听服务器返回的数据
     Websocket.websocket.onmessage = (e: any) => {
       //处理服务器传递过来的参数
       let data: any = JSON.parse(e.data);
       //处理消息
       switch (data.type) {
-        case gameEnum.LoginSuccessType:
+        //全局群聊消息
+        case chatEnum.ChatGroupType:
+          globalStore.chatHistory.push(data);
+          break;
+        //离线消息
+        case chatEnum.OffLineType:
+        case chatEnum.OnLineType:
+          //重新获取用户列表
+          getUserList().then((res) => {
+            globalStore.onlineUserList = res.data;
+          });
+          break;
+        case chatEnum.LoginSuccessType:
           //清理定时器任务
           clearInterval(Websocket.reconnect_timer);
           //初始化参数
           Websocket.reconnect_current = 1;
           Websocket.reconnect_timer = null;
           Websocket.notification["success"]({
-            content: "连接服务器成功",
-            meta: "推荐使用Microsoft Edge浏览器进行操作。",
-            duration: 1500,
-            keepAliveOnHover: true,
-          });
-          break;
-        case gameEnum.ServerMessageSuccessType:
-          let serverInfo = JSON.parse(data.data);
-          //重新设置全局挤服对象人数信息
-          globalStore.automaticInfo.players = serverInfo.players;
-          globalStore.automaticInfo.maxPlayers = serverInfo.maxPlayers;
-          //全局isAutomatic 为 false
-          if (!globalStore.isAutomatic) return;
-          //如果返回状态为 true 则继续挤服
-          if (!serverInfo.status) {
-            globalStore.automaticCount++;
-            Websocket.sendMessage(globalStore.automaticInfo);
-            return;
-          }
-          //清空数据
-          globalStore.isAutomatic = false;
-          globalStore.automaticCount = 0;
-          const aLink = document.createElement("a");
-          aLink.href =
-            "steam://rungame/730/76561198977557298/+connect " +
-            serverInfo.ip +
-            ":" +
-            serverInfo.port;
-          aLink.click();
-          //发送消息
-          Websocket.notification["success"]({
             content: "连接成功",
+            meta: "聊天室连接成功",
             duration: 1500,
             keepAliveOnHover: true,
           });
-        case gameEnum.MessageFailType:
-          //避免消息失败导致挤服生效
-          Websocket.sendMessage(globalStore.automaticInfo);
-          break;
-        case gameEnum.ServerPushServerDataType:
-          globalStore.serverInfo = new Map(
-            Object.entries(JSON.parse(data.data))
-          );
           break;
         default:
-          break;
+          Websocket.notification["warning"]({
+            content: "未知消息",
+            meta: "消息类型错误",
+            duration: 2000,
+            keepAliveOnHover: true,
+          });
       }
     };
     //连接断开时触发
@@ -110,14 +99,13 @@ const Websocket: any = {
               meta: "聊天室连接失败",
               keepAliveOnHover: true,
             });
-            Websocket.websocket = null;
             clearInterval(Websocket.reconnect_timer);
             return;
           }
           // 记录重连次数
           Websocket.reconnect_current++;
           // 创建连接
-          Websocket.reconnect();
+          Websocket.reconnect(true);
         }, Websocket.reconnect_interval);
       }
     };
@@ -127,8 +115,8 @@ const Websocket: any = {
     Websocket.websocket.onopen = function () {};
   },
   // 发送数据 全体消息
-  sendMessage: (data: any) => {
-    Websocket.websocket.send(JSON.stringify(data));
+  sendMsgAll: (data: any) => {
+    Websocket.websocket.send(data);
   },
   // 断开连接
   close: (isReonnect: boolean) => {

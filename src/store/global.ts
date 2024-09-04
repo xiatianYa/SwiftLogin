@@ -1,6 +1,13 @@
 import { defineStore } from "pinia";
 import { stringToBoolean } from "@/utils/common";
 import gameSocket from "@/utils/gameSocket";
+import chatSocket from "@/utils/chatSocket";
+//用户对象
+interface userVoType {
+  userId: number;
+  userAvatar: string;
+  userNickName: string;
+}
 export interface Global {
   //是否在自动挤服
   isAutomatic: boolean;
@@ -20,6 +27,10 @@ export interface Global {
   nightCycle: boolean;
   //服务器推送ws数据
   serverInfo: any;
+  //接收到的消息列表
+  chatHistory: Array<any>;
+  //在线用户列表
+  onlineUserList: Array<userVoType>;
 }
 export const useGloBalStore = defineStore("global", {
   // 真正存储数据的地方
@@ -33,14 +44,20 @@ export const useGloBalStore = defineStore("global", {
       autoMapInfo: null,
       automaticCount: 0,
       onHookNumber: 0,
-      nightCycle: stringToBoolean(localStorage.getItem("nightCycle")),
       serverInfo: null,
+      nightCycle: stringToBoolean(localStorage.getItem("nightCycle")),
+      chatHistory: [],
+      onlineUserList: [],
     };
   },
   actions: {
-    //初始化socket
-    initSocket() {
+    //初始化gameSocket
+    initGameSocket() {
       gameSocket.init();
+    },
+    //初始化chatSocket
+    initChatSocket() {
+      chatSocket.init();
     },
     initGlobal() {
       this.isAutomatic = false;

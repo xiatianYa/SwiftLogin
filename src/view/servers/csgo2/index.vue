@@ -198,10 +198,10 @@
                                 </template>
                                 <span>
                                     地图订阅：<br>
-                                    功能说明：此功能允许您选择一个地图,在获取到地图更新时立即加入服务器(不适用当前地图已存在,且人数过高,会导致进服失败!)。<br>
+                                    功能说明：此功能允许您选择一个地图,在获取到地图将发送一条通知提醒。<br>
                                     配置要点：<br>
                                     仅需选择“地图”即可启用此功能。<br>
-                                    需要浏览器通知权限(重点),推荐默认允许打开!<br>
+                                    需要浏览器通知权限(重点)<br>
                                     只能订阅你目前勾选的社区进行订阅(页面所展示的服务器)!<br>
                                 </span>
                             </n-popover>
@@ -780,17 +780,13 @@ const rowClassName = (row: RowData) => {
 watch(() => serverData.value, (newValue: any, oldValue: any) => {
     //当地图订阅开启
     if (globalStore.isAutoMap && globalStore.autoMapInfo) {
-        let mapResult = newValue.find((item: any) => item.map = globalStore.autoMapInfo.value)
+        let mapResult = newValue.find((item: any) => item.map === globalStore.autoMapInfo.value)
         if (mapResult) {
-            //清空自动挤服
-            globalStore.isAutoMap = false;
-            mapDialog.value = false;
-            globalStore.autoMapInfo = null;
             // 判断浏览器是否支持唤醒
             if (window.Notification) {
                 let popNotice = () => {
                     const notification = new Notification('地图订阅通知', {
-                        body: "您所订阅的地图 " + mapResult.mapName + " 已在 " + mapResult.name + " 进行游戏,已为你自动连接服务器。"
+                        body: "您所订阅的地图 " + mapResult.mapName + " 已在 " + mapResult.name + " 进行游戏。"
                     })
                     // 点击通知的回调函数
                     notification.onclick = () => {
@@ -808,30 +804,21 @@ watch(() => serverData.value, (newValue: any, oldValue: any) => {
                     })
                 }
             }
-            // 自动连接服务器
-            const aLink = document.createElement("a");
-            aLink.href =
-                "steam://rungame/730/76561198977557298/+connect " +
-                mapResult.ip +
-                ":" +
-                mapResult.port;
-            aLink.click();
         }
     }
     //当打开抽屉地图信息时 
     if (globalStore.automaticInfo) {
-        let mapResult = newValue.find((item: any) => item.map == globalStore.automaticInfo.map)
+        let mapResult = newValue.find((item: any) => item.map === globalStore.automaticInfo.map)
         globalStore.automaticInfo = { ...globalStore.automaticInfo, ...mapResult }
-        console.log(globalStore.automaticInfo);
-
     }
 }, { deep: true })
 
 watch(() => globalStore.serverInfo, async (newValue: any, oldValue: any) => {
-    if (!newValue || !serverList.value) {
+    if (!newValue || !serverList.value.rows) {
         return;
     }
     //获取所有服务器
+    
     let serverResult = serverList.value.rows.map((item: any) => {
         return {
             ...item,
