@@ -58,18 +58,7 @@
                     </n-space>
                     <n-space class="mb-10" vertical>
                         <n-input-number class="mb-5" v-model:value="globalStore.automaticInfo.minPlayers"
-                            :disabled="globalStore.isAutomatic || globalStore.isAutoHook"
-                            placeholder="最小玩家数 (小于或于时自动进入服务器)" :min="0" clearable>
-                            <template #minus-icon>
-                                <n-icon :component="ArrowDownCircleOutline" />
-                            </template>
-                            <template #add-icon>
-                                <n-icon :component="ArrowUpCircleOutline" />
-                            </template>
-                        </n-input-number>
-                        <n-input-number class="mb-5" v-model:value="globalStore.automaticInfo.automaticIntervalNumber"
-                            :disabled="globalStore.isAutomatic || globalStore.isAutoHook"
-                            placeholder="挂机间隔 (每隔多少分钟重新进入服务器)" :min="1" clearable>
+                            :disabled="globalStore.isAutomatic" placeholder="最小玩家数 (小于或于时自动进入服务器)" :min="0" clearable>
                             <template #minus-icon>
                                 <n-icon :component="ArrowDownCircleOutline" />
                             </template>
@@ -84,21 +73,7 @@
                                 自动挤服
                             </span>
                             <n-switch v-model:value="globalStore.isAutomatic" size="large"
-                                :disabled="globalStore.isAutoHook" :on-update:value="handleAutomaticPersonnel">
-                                <template #checked-icon>
-                                    <n-icon :component="CaretBackCircleOutline" />
-                                </template>
-                                <template #unchecked-icon>
-                                    <n-icon :component="CaretForwardCircleOutline" />
-                                </template>
-                            </n-switch>
-                        </div>
-                        <div class="d_flex_ac">
-                            <span class="mr-5">
-                                自动挂机
-                            </span>
-                            <n-switch v-model:value="globalStore.isAutoHook" size="large"
-                                :disabled="globalStore.isAutomatic" :on-update:value="handleAutomaticInterval">
+                                :on-update:value="handleAutomaticPersonnel">
                                 <template #checked-icon>
                                     <n-icon :component="CaretBackCircleOutline" />
                                 </template>
@@ -119,14 +94,6 @@
                                     功能说明：此功能允许您设定一个最小玩家数。当服务器内玩家数量减少到或低于此数时，系统将自动尝试进入该服务器。<br>
                                     配置要点：<br>
                                     仅需设置“最小玩家数”即可启用此功能。<br>
-                                    需要浏览器通知权限(重点),推荐默认允许打开!<br>
-                                    <br>
-                                    自动挂机：<br>
-                                    功能说明：除了设定最小玩家数外，您还可以设置挂机间隔。每当达到设定的间隔时间，系统会检查当前服务器玩家数。若玩家数低于或等于设定的最小玩家数，系统将自动尝试进入服务器以进行挂机。<br>
-                                    配置要点：<br>
-                                    设置“最小玩家数”。<br>
-                                    设置“挂机间隔”（即两次尝试进入服务器之间的时间间隔）。<br>
-                                    浏览器兼容性：请注意，此自动挂机功能在谷歌浏览器中可能不可用。为获得最佳体验，推荐使用Microsoft Edge浏览器进行挂机操作。<br>
                                     需要浏览器通知权限(重点),推荐默认允许打开!<br>
                                 </span>
                             </n-popover>
@@ -263,9 +230,6 @@ const queryParams = ref<any>({
 
 //服务器信息定时任务
 const getServerInterval = ref()
-
-//挂机模式定时任务
-const getOnHookInterval = ref()
 
 //服务器表格数据
 const serverData = ref<any>([])
@@ -456,7 +420,7 @@ const serverColumns = ref([
                             renderIcon: renderIcon(AlarmOutline),
                             onClick: () => onAutomatic(row)
                         },
-                        { default: () => '自动挤服 / 挂机模式' }
+                        { default: () => '自动挤服' }
                     )
                 ]
             );
@@ -481,39 +445,6 @@ const handleAutomaticPersonnel = (value: boolean) => {
     //发送消息 开始主动挤服
     globalStore.isAutomatic = value;
     gameSocket.sendMessage(globalStore.automaticInfo);
-}
-
-//开启自动挂机
-const handleAutomaticInterval = (value: boolean) => {
-    //关闭主动挂机
-    if (!value) {
-        //清除挤服次数
-        globalStore.onHookNumber = 0;
-        globalStore.automaticCount = 0;
-        globalStore.isAutoHook = value;
-        //清空定时任务
-        clearInterval(getOnHookInterval.value);
-        return;
-    }
-    //未填写挤服人数
-    if (!globalStore.automaticInfo.minPlayers) {
-        message.warning("请填最小玩家数!");
-        return;
-    }
-    //为填写挂机间隔
-    if (!globalStore.automaticInfo.automaticIntervalNumber) {
-        message.warning("请填写挂机间隔!");
-        return;
-    }
-    //开启 挂机定时任务
-    globalStore.isAutoHook = value;
-    getOnHookInterval.value = setInterval(async () => {
-        //设置全局挤服
-        globalStore.isAutomatic = true;
-        globalStore.onHookNumber++;
-        //开始挤服
-        gameSocket.sendMessage(globalStore.automaticInfo);
-    }, globalStore.automaticInfo.automaticIntervalNumber * 60000);
 }
 
 //开启/关闭 自动订阅地图
@@ -818,7 +749,7 @@ watch(() => globalStore.serverInfo, async (newValue: any, oldValue: any) => {
         return;
     }
     //获取所有服务器
-    
+
     let serverResult = serverList.value.rows.map((item: any) => {
         return {
             ...item,

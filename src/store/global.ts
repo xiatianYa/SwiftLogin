@@ -11,8 +11,6 @@ interface userVoType {
 export interface Global {
   //是否在自动挤服
   isAutomatic: boolean;
-  //是否在自动挂机
-  isAutoHook: boolean;
   //是否在地图订阅
   isAutoMap: boolean;
   //挤服信息
@@ -38,7 +36,6 @@ export const useGloBalStore = defineStore("global", {
     return {
       //是否在自动挤服
       isAutomatic: false,
-      isAutoHook: false,
       isAutoMap: false,
       automaticInfo: null,
       autoMapInfo: null,
@@ -61,7 +58,6 @@ export const useGloBalStore = defineStore("global", {
     },
     initGlobal() {
       this.isAutomatic = false;
-      this.isAutoHook = false;
       this.isAutoMap = false;
       this.automaticInfo = null;
       this.autoMapInfo = null;

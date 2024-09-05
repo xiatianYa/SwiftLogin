@@ -31,7 +31,7 @@ const Websocket: any = {
       Websocket.notification["error"]({
         content: "适配警告",
         meta: "浏览器不支持WebSocket",
-        duration: 2500,
+        duration: 1500,
         keepAliveOnHover: true,
       });
       return;
@@ -40,7 +40,7 @@ const Websocket: any = {
       Websocket.notification["error"]({
         content: "认证失败",
         meta: "Token不存在",
-        duration: 2500,
+        duration: 1500,
         keepAliveOnHover: true,
       });
       return;
@@ -82,7 +82,7 @@ const Websocket: any = {
           Websocket.notification["warning"]({
             content: "未知消息",
             meta: "消息类型错误",
-            duration: 2000,
+            duration: 1500,
             keepAliveOnHover: true,
           });
       }

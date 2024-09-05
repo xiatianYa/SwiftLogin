@@ -5,7 +5,7 @@
                 <n-menu v-model="activeKey" mode="horizontal" :options="menuOptions" responsive :inverted="inverted" />
             </template>
             <template #2>
-                <n-space style="height: 100%;" class="d_flex_ac ml-10">
+                <n-space style="height: 100%;" class="d_flex_ac ml-10" :wrap="false">
                     <n-switch size="large" v-model:value="globalStore.nightCycle" :on-update:value="handleCycle"
                         :default-value="globalStore.nightCycle" :round="false">
                         <template #checked-icon>
@@ -23,10 +23,14 @@
                         <n-dropdown :options="userOptions" @select="handleSelect">
                             <n-avatar round size="small" :src="userStore.avatar" />
                         </n-dropdown>
+                        <n-ellipsis style="max-width: 50px;font-size: 14px;font-weight:600;" class="ml-5">
+                            {{ userStore.nickName }}
+                        </n-ellipsis>
                     </div>
                 </n-space>
             </template>
         </n-split>
+          <!-- 登录框 -->
         <n-modal v-model:show="showLogin">
             <n-card style="width: 400px; position: fixed; top: 15%; left: 50%;transform: translateX(-50%);" title="登录"
                 :bordered="false" size="huge" role="dialog" aria-modal="true" transform-origin="center" closable
@@ -41,6 +45,7 @@
                 </div>
             </n-card>
         </n-modal>
+          <!-- 聊天框 -->
     </div>
 </template>
 
@@ -49,14 +54,13 @@ import useStore from "@/store";
 import QC from '@/assets/js/qqAuth.js';
 import type { Component } from 'vue'
 import { h, ref, onMounted } from 'vue'
-import { NIcon, NMenu, NSplit, NSpace, NSwitch, NModal, NCard, useMessage, NAvatar, NDropdown } from 'naive-ui'
+import { NIcon, NMenu, NSplit, NSpace, NSwitch, NModal, NCard, useMessage, NAvatar, NDropdown, NEllipsis } from 'naive-ui'
 import { RouterLink } from 'vue-router'
 import type { MenuOption } from 'naive-ui'
 import {
     Home as HomeIcon,
     GameControllerOutline as GameIcon,
     BriefcaseOutline as BriefcaseIcon,
-    ChatboxEllipsesOutline as ChatIcon,
     MapOutline as MapIcon,
     PeopleCircleOutline as PeopleCircleIcon,
     PersonCircleSharp as PersonCircleIcon,
@@ -194,23 +198,6 @@ const menuOptions: MenuOption[] = [
     {
         label: () =>
             h(
-                RouterLink,
-                {
-                    to: {
-                        name: 'chat',
-                        params: {
-                            lang: 'zh-CN'
-                        }
-                    }
-                },
-                { default: () => '聊天室' }
-            ),
-        key: 'chat',
-        icon: renderIcon(ChatIcon)
-    },
-    {
-        label: () =>
-            h(
                 'a',
                 {
                     href: 'https://qm.qq.com/cgi-bin/qm/qr?k=jARGHlUgKmBc5vHMJZG4oWTxy7cIgJq1&jump_from=webapi&authKey=Jz92LvgbizYMrgquwOg+wH2ofLC514UbcB2vNtBRE6CsCJ2BmOsZXaXyMb5ZVqOe',
@@ -278,8 +265,6 @@ const checkLogin = () => {
                     setExpiresIn(result.expires_in)
                     //设置本地仓库Token
                     userStore.setToken(result.access_token)
-                    //初始化聊天Scoket
-                    globalStore.initChatSocket();
                     //提示用户信息
                     message.success("登录成功")
                     //调整路由

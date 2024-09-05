@@ -53,12 +53,7 @@ const router = createRouter({
           path: "/map",
           name: "map",
           component: () => import("@/view/map/index.vue"),
-        },
-        {
-          path: "/chat",
-          name: "chat",
-          component: () => import("@/view/chat/index.vue"),
-        },
+        }
       ],
     },
     //未知路由 全部前往404页面

@@ -30,7 +30,7 @@ const Websocket: any = {
       Websocket.notification["error"]({
         content: "适配警告",
         meta: "浏览器不支持WebSocket",
-        duration: 2500,
+        duration: 1500,
         keepAliveOnHover: true,
       });
       return;
