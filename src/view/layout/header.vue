@@ -23,14 +23,14 @@
                         <n-dropdown :options="userOptions" @select="handleSelect">
                             <n-avatar round size="small" :src="userStore.avatar" />
                         </n-dropdown>
-                        <n-ellipsis style="max-width: 50px;font-size: 14px;font-weight:600;" class="ml-5">
+                        <n-ellipsis style="max-width: 100px;font-size: 14px;font-weight:600;" class="ml-5">
                             {{ userStore.nickName }}
                         </n-ellipsis>
                     </div>
                 </n-space>
             </template>
         </n-split>
-          <!-- 登录框 -->
+        <!-- 登录框 -->
         <n-modal v-model:show="showLogin">
             <n-card style="width: 400px; position: fixed; top: 15%; left: 50%;transform: translateX(-50%);" title="登录"
                 :bordered="false" size="huge" role="dialog" aria-modal="true" transform-origin="center" closable
@@ -45,7 +45,7 @@
                 </div>
             </n-card>
         </n-modal>
-          <!-- 聊天框 -->
+        <!-- 聊天框 -->
     </div>
 </template>
 
@@ -283,6 +283,8 @@ const logOut = () => {
     userStore.logOut();
     //清除第三方登录
     QC.Login.signOut();
+    //清除websocket连接
+    globalStore.clostChatSocket();
     //提示
     message.success("退出成功");
 }

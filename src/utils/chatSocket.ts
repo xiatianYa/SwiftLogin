@@ -57,12 +57,19 @@ const Websocket: any = {
         case chatEnum.ChatGroupType:
           globalStore.chatHistory.push(data);
           break;
-        //离线消息
+        //在线|离线消息
         case chatEnum.OffLineType:
         case chatEnum.OnLineType:
           //重新获取用户列表
           getUserList().then((res) => {
-            globalStore.onlineUserList = res.data;
+            globalStore.onlineUserList = res.data.map((item: any) => {
+              let { userId, userAvatar, userNickName } = item;
+              return {
+                id: userId,
+                name: userNickName,
+                src: userAvatar,
+              };
+            });
           });
           break;
         case chatEnum.LoginSuccessType:
@@ -100,6 +107,7 @@ const Websocket: any = {
               keepAliveOnHover: true,
             });
             clearInterval(Websocket.reconnect_timer);
+            Websocket.websocket = null;
             return;
           }
           // 记录重连次数

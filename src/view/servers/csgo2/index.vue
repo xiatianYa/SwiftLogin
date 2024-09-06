@@ -36,7 +36,7 @@
             </n-spin>
         </div>
         <!-- 自动挤服 / 挂机模式 抽屉 -->
-        <n-drawer v-model:show="automaticDialog" :width="502" placement="right" :on-after-leave="handleDrawerClose">
+        <n-drawer v-model:show="automaticDialog" :width="500" placement="right" :on-after-leave="handleDrawerClose">
             <n-drawer-content :title="globalStore.automaticInfo.name" closable>
                 <n-card :bordered="false">
                     <n-space class="mb-10">
@@ -101,45 +101,47 @@
                     </n-space>
                     <n-space class="mt-10">
                         <span>
-                            尝试次数 : {{ globalStore.automaticCount }}
-                        </span>
-                        <span>
-                            挂机次数 : {{ globalStore.onHookNumber }}
+                            检测次数 : {{ globalStore.automaticCount }}
                         </span>
                     </n-space>
                 </n-card>
             </n-drawer-content>
         </n-drawer>
         <!-- 地图订阅 -->
-        <n-drawer v-model:show="mapDialog" :width="502" placement="right" :on-after-leave="handleDrawerClose">
+        <n-drawer v-model:show="mapDialog" :width="500" placement="right" :on-after-leave="handleDrawerClose">
             <n-drawer-content title="地图订阅" closable>
                 <n-card :bordered="false">
-                    <n-space vertical class="mb-10">
-                        <n-select :value="globalStore.autoMapInfo?.label || null" filterable placeholder="选择地图"
+                    <n-space class="mb-10">
+                        <n-select style="width: 150px;" v-model:value="mapInfo.label" filterable placeholder="选择地图"
                             :disabled="globalStore.isAutoMap" :options="selectOption.map"
-                            @update:value="handleUpdateMapValue" clearable />
+                            @update:value="handleUpdateMapValue" />
+                        <n-select style="width: 150px;" v-model:value="MapCommunityId" :options="selectOption.community"
+                            placeholder="请选择社区" />
+                        <n-button type="success" @click="appendMap">添加</n-button>
                     </n-space>
                     <n-space>
-                        <div class="d_flex" v-if="globalStore.autoMapInfo">
-                            <n-image width="220" height="100%" class="mr-5" :src="globalStore.autoMapInfo.mapUrl"
-                                v-if="globalStore.autoMapInfo.mapUrl" />
-                            <div>
+                        <n-scrollbar style="max-height: 450px">
+                            <div class="d_flex mt-10" v-if="globalStore.autoMapListInfo"
+                                v-for="mapInfo in globalStore.autoMapListInfo">
+                                <n-image width="200" height="100%" class="mr-5" :src="mapInfo.mapUrl"
+                                    v-if="mapInfo.mapUrl" />
                                 <div>
-                                    地图名 : {{ globalStore.autoMapInfo.value }}
-                                </div>
-                                <div class="mt-5">
-                                    地图译名 :{{ globalStore.autoMapInfo.label }}
-                                </div>
-                                <div class="mt-5">
-                                    <n-tag :color="renderColor(globalStore.autoMapInfo.typeName)" size="small"
-                                        class="mr-5">{{
-                                            globalStore.autoMapInfo.typeName }}</n-tag>
-                                    <n-tag size="small" type="success" class="mr-5"
-                                        v-for="item in globalStore.autoMapInfo?.tagName?.split(',').filter((item: any) => item != null && item != '')">{{
-                                            item }}</n-tag>
+                                    <div>
+                                        地图名 : {{ mapInfo.value }}
+                                    </div>
+                                    <div class="mt-5">
+                                        地图译名 :{{ mapInfo.label }}
+                                    </div>
+                                    <div class="mt-5">
+                                        <n-tag :color="renderColor(mapInfo.typeName)" size="small" class="mr-5">{{
+                                            mapInfo.typeName }}</n-tag>
+                                        <n-tag size="small" type="success" class="mr-5"
+                                            v-for="item in mapInfo?.tagName?.split(',').filter((item: any) => item != null && item != '')">{{
+                                                item }}</n-tag>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </n-scrollbar>
                     </n-space>
                     <n-space class="mt-5">
                         <div class="d_flex_ac">
@@ -192,9 +194,10 @@ import { getServerInfo } from '@/api/steamApi'
 import { CustomType } from "@/types";
 import type { Component } from 'vue'
 import { ref, h, onMounted, watch } from 'vue';
-import { NSelect, NButton, NIcon, NImage, NSpin, NProgress, useNotification, NDrawer, NDrawerContent, NCard, NSpace, NSwitch, NInputNumber, NStatistic, NNumberAnimation, NPopover, useMessage, NTag, SelectOption } from 'naive-ui';
+import { NSelect, NButton, NIcon, NImage, NScrollbar, NSpin, NProgress, useNotification, NDrawer, NDrawerContent, NCard, NSpace, NSwitch, NInputNumber, NStatistic, NNumberAnimation, NPopover, useMessage, NTag, SelectOption } from 'naive-ui';
 import { Search, AlarmOutline, MapOutline, CopyOutline, EnterOutline, ArrowDownCircleOutline, ArrowUpCircleOutline, CaretForwardCircleOutline, CaretBackCircleOutline, InformationCircleOutline } from '@vicons/ionicons5';
 import { RowData } from 'naive-ui/es/data-table/src/interface';
+import { isWithinThreeHours } from '@/utils/common'
 
 //全局仓库
 let { globalStore } = useStore();
@@ -216,6 +219,12 @@ const automaticDialog = ref(false)
 
 //地图订阅 抽屉
 const mapDialog = ref(false)
+
+//地图订阅消息
+const mapInfo = ref<any>({})
+
+//地图订阅社区
+const MapCommunityId = ref<any>(null)
 
 //数据是否加载
 const loading = ref(false)
@@ -449,7 +458,12 @@ const handleAutomaticPersonnel = (value: boolean) => {
 
 //开启/关闭 自动订阅地图
 const handleAutomaticMap = (value: boolean) => {
-    if (!globalStore.autoMapInfo) {
+    if (Object.keys(mapInfo.value).length === 0 &&
+        Object.getOwnPropertyNames(mapInfo.value).length === 0 || !globalStore.autoMapListInfo.length) {
+        message.warning("请先选择订阅地图!");
+        return;
+    }
+    if (!globalStore.autoMapListInfo) {
         message.warning('请选择订阅地图')
         return;
     }
@@ -469,7 +483,23 @@ const handleDrawerClose = () => {
 
 //选择地图订阅
 const handleUpdateMapValue = (_value: string, option: SelectOption) => {
-    globalStore.autoMapInfo = JSON.parse(JSON.stringify(option))
+    mapInfo.value = JSON.parse(JSON.stringify(option));
+}
+
+//添加地图订阅
+const appendMap = () => {
+    if (Object.keys(mapInfo.value).length === 0 &&
+        Object.getOwnPropertyNames(mapInfo.value).length === 0) {
+        message.warning("请先选择订阅地图!");
+        return;
+    }
+    for (const map of globalStore.autoMapListInfo) {
+        if (map.label === mapInfo.value.label) {
+            message.warning("你已添加过此地图,请勿重复添加!");
+            return;
+        }
+    }
+    globalStore.autoMapListInfo.push(mapInfo.value)
 }
 
 //打开地图订阅
@@ -710,32 +740,96 @@ const rowClassName = (row: RowData) => {
 //地图数据接听
 watch(() => serverData.value, (newValue: any, oldValue: any) => {
     //当地图订阅开启
-    if (globalStore.isAutoMap && globalStore.autoMapInfo) {
-        let mapResult = newValue.find((item: any) => item.map === globalStore.autoMapInfo.value)
-        if (mapResult) {
-            // 判断浏览器是否支持唤醒
-            if (window.Notification) {
-                let popNotice = () => {
-                    const notification = new Notification('地图订阅通知', {
-                        body: "您所订阅的地图 " + mapResult.mapName + " 已在 " + mapResult.name + " 进行游戏。"
-                    })
-                    // 点击通知的回调函数
-                    notification.onclick = () => {
-                        window.open('https://www.bluearchive.top')
-                        notification.close()
+    if (globalStore.isAutoMap && globalStore.autoMapListInfo.length) {
+        globalStore.serverInfo.forEach((value: any, key: any) => {
+            //用户勾选了社区
+            if (MapCommunityId.value && String(MapCommunityId.value) === key) {
+                let responsePromise = JSON.parse(value)
+                responsePromise.map((item: any) => {
+                    //获取服务器信息
+                    let serverInfo = item.response.servers
+                    if (!serverInfo) return;
+                    //获取地图名
+                    let { name, addr, map } = serverInfo[0];
+                    //判断地图是否已提醒过
+                    let receiveResult = globalStore.autoMapReceiveList.find((item: any) => item.addr == addr && item.map == map && isWithinThreeHours(item.receiveDate))
+                    if (receiveResult) {
+                        return;
                     }
-                }
-                /* 授权过通知 */
-                if (Notification.permission === 'granted') {
-                    popNotice()
-                } else {
-                    /* 未授权，先询问授权 */
-                    Notification.requestPermission(() => {
-                        popNotice()
-                    })
-                }
+                    //查找订阅地图是否存在
+                    let mapResult = globalStore.autoMapListInfo.find((item: any) => item.value == map)
+                    if (mapResult) {
+                        // 判断浏览器是否支持唤醒
+                        if (window.Notification) {
+                            let popNotice = () => {
+                                const notification = new Notification('地图订阅通知', {
+                                    body: `您所订阅的地图 ${map}(${mapResult.label ? mapResult.label : '暂无译名'}) 已在 ${name} 进行游戏。`
+                                })
+                                // 点击通知的回调函数
+                                notification.onclick = () => {
+                                    window.open('https://www.bluearchive.top')
+                                    notification.close()
+                                }
+                            }
+                            /* 授权过通知 */
+                            if (Notification.permission === 'granted') {
+                                popNotice()
+                            } else {
+                                /* 未授权，先询问授权 */
+                                Notification.requestPermission(() => {
+                                    popNotice()
+                                })
+                            }
+                        }
+                        //添加到全局订图列表 避免重复提示
+                        globalStore.autoMapReceiveList.push({ addr, map, receiveDate: new Date() })
+                    }
+                })
+            } else if (!MapCommunityId.value) {
+                //当未勾选社区
+                let responsePromise = JSON.parse(value)
+                responsePromise.map((item: any) => {
+                    //获取服务器信息
+                    let serverInfo = item.response.servers
+                    if (!serverInfo) return;
+                    //获取地图名
+                    let { name, addr, map } = serverInfo[0];
+                    //判断地图是否已提醒过
+                    let receiveResult = globalStore.autoMapReceiveList.find((item: any) => item.addr == addr && item.map == map && isWithinThreeHours(item.receiveDate))
+                    if (receiveResult) {
+                        return;
+                    }
+                    //查找订阅地图是否存在
+                    let mapResult = globalStore.autoMapListInfo.find((item: any) => item.value == map)
+                    if (mapResult) {
+                        // 判断浏览器是否支持唤醒
+                        if (window.Notification) {
+                            let popNotice = () => {
+                                const notification = new Notification('地图订阅通知', {
+                                    body: `您所订阅的地图 ${map}(${mapResult.label ? mapResult.label : '暂无译名'}) 已在 ${name} 进行游戏。`
+                                })
+                                // 点击通知的回调函数
+                                notification.onclick = () => {
+                                    window.open('https://www.bluearchive.top')
+                                    notification.close()
+                                }
+                            }
+                            /* 授权过通知 */
+                            if (Notification.permission === 'granted') {
+                                popNotice()
+                            } else {
+                                /* 未授权，先询问授权 */
+                                Notification.requestPermission(() => {
+                                    popNotice()
+                                })
+                            }
+                        }
+                        //添加到全局订图列表 避免重复提示
+                        globalStore.autoMapReceiveList.push({ addr, map, receiveDate: new Date() })
+                    }
+                })
             }
-        }
+        })
     }
     //当打开抽屉地图信息时 
     if (globalStore.automaticInfo) {

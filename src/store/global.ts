@@ -4,9 +4,9 @@ import gameSocket from "@/utils/gameSocket";
 import chatSocket from "@/utils/chatSocket";
 //用户对象
 interface userVoType {
-  userId: number;
-  userAvatar: string;
-  userNickName: string;
+  id: number;
+  src: string;
+  name: string;
 }
 export interface Global {
   //是否在自动挤服
@@ -16,11 +16,9 @@ export interface Global {
   //挤服信息
   automaticInfo: any;
   //地图订阅信息
-  autoMapInfo: any;
+  autoMapListInfo: Array<any>;
   //挤服次数
   automaticCount: number;
-  //挂机次数
-  onHookNumber: number;
   //白天 黑夜模式
   nightCycle: boolean;
   //服务器推送ws数据
@@ -29,6 +27,8 @@ export interface Global {
   chatHistory: Array<any>;
   //在线用户列表
   onlineUserList: Array<userVoType>;
+  //已接收到地图订阅的服务器消息
+  autoMapReceiveList: Array<any>;
 }
 export const useGloBalStore = defineStore("global", {
   // 真正存储数据的地方
@@ -38,13 +38,13 @@ export const useGloBalStore = defineStore("global", {
       isAutomatic: false,
       isAutoMap: false,
       automaticInfo: null,
-      autoMapInfo: null,
+      autoMapListInfo: [],
       automaticCount: 0,
-      onHookNumber: 0,
       serverInfo: null,
       nightCycle: stringToBoolean(localStorage.getItem("nightCycle")),
       chatHistory: [],
       onlineUserList: [],
+      autoMapReceiveList: [],
     };
   },
   actions: {
@@ -56,13 +56,19 @@ export const useGloBalStore = defineStore("global", {
     initChatSocket() {
       chatSocket.init();
     },
+    //关闭chatSocket
+    clostChatSocket() {
+      chatSocket.close();
+    },
+    //清空全局
     initGlobal() {
       this.isAutomatic = false;
-      this.isAutoMap = false;
       this.automaticInfo = null;
-      this.autoMapInfo = null;
       this.automaticCount = 0;
-      this.onHookNumber = 0;
+    },
+    //发送聊天消息
+    sendMessage(data: any) {
+      chatSocket.sendMsgAll(data);
     },
   },
 });

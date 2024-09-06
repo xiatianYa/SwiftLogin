@@ -23,10 +23,6 @@ onMounted(() => {
     //     meta: "网页版本登录器将于2024/9/01 13:00:00 -> 2024/09/01 15:30:00 预计更新完成,问题反馈请加QQ群901243791",
     //     keepAliveOnHover: true,
     // });
-    //初始化聊天Scoket
-    if (userStore.token) {
-        globalStore.initChatSocket();
-    }
     globalStore.initGameSocket()
 })
 </script>
