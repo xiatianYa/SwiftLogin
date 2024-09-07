@@ -1,4 +1,4 @@
-let wsUrl = "ws://127.0.0.1:9207/gameServer";
+let wsUrl = "wss://www.bluearchive.top:9207/gameServer";
 import gameEnum from "./gameEnum";
 import useStore from "@/store";
 import { createDiscreteApi } from "naive-ui";

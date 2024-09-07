@@ -1,23 +1,18 @@
 <template>
     <!-- 等级数量 -->
-    <ReuseEcharts :option="option" style="height: 100%;" ref="charts" />
+    <ReuseEcharts :option="option" style="height: 100%;" ref="charts" chartsRef="PersonnelCakeRef" />
 </template>
 <script setup lang="ts">
-import { ref, toRefs, onMounted, watch } from 'vue';
-import * as echarts from "echarts";
+import { ref, onMounted, watch, defineProps } from 'vue';
 import ReuseEcharts from '@/components/reuseEcharts/index.vue';
 
-interface Props {
-    chartData: any,
-}
+// 定义 props 类型  
+type Props = {
+    chartData: any; // 这里假设 myProp 是一个字符串  
+};
 
-let props = withDefaults(defineProps<Props>(), {
-    chartData: () => {
-        return null;
-    },
-})
-
-let { chartData } = toRefs(props);
+// 使用 defineProps 接收 props  
+const props = defineProps<Props>();
 
 const charts = ref();
 
@@ -74,20 +69,23 @@ const initCharts = () => {
 };
 
 const drawCharts = () => {
-    if (!chartData.value) {
+    if (!props.chartData) {
         return;
     }
-    for (let index = 0; index < chartData.value.length; index++) {
-        const seriesData = chartData.value[index];
+    if (props.chartData.length == 0) {
+        return;
+    }
+    for (let index = 0; index < props.chartData.length; index++) {
+        const seriesData = props.chartData[index];
         option.value.series[0].data[index].value = seriesData;
     }
     charts.value.drawCharts();
 }
 
 
-watch(chartData, () => {
+watch(props, () => {
     drawCharts()
-});
+}, { deep: true });
 
 onMounted(() => {
     initCharts()

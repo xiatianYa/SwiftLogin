@@ -1,23 +1,19 @@
 <template>
     <!-- 等级数量 -->
-    <ReuseEcharts :option="option" style="width: 100%;height: 100%;" ref="charts" />
+    <ReuseEcharts :option="option" style="width: 100%;height: 100%;" ref="charts" chartsRef="PersonnelRef" />
 </template>
 <script setup lang="ts">
-import { ref, toRefs, onMounted, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import * as echarts from "echarts";
 import ReuseEcharts from '@/components/reuseEcharts/index.vue';
 
-interface Props {
-    chartData: any,
-}
+// 定义 props 类型  
+type Props = {
+    chartData: any; // 这里假设 myProp 是一个字符串  
+};
 
-let props = withDefaults(defineProps<Props>(), {
-    chartData: () => {
-        return null;
-    },
-})
-
-let { chartData } = toRefs(props);
+// 使用 defineProps 接收 props  
+const props = defineProps<Props>();
 
 const charts = ref();
 
@@ -82,15 +78,18 @@ const initCharts = () => {
 };
 
 const drawCharts = () => {
-    if (!chartData.value) {
+    if (!props.chartData) {
         return;
     }
-    option.value.legend.data = chartData.value.communityNameList;
-    option.value.xAxis[0].data = chartData.value.xaxisData;
-    for (let index = 0; index < chartData.value.yaxisData.length; index++) {
-        const xData = chartData.value.yaxisData[index];
+    if (props.chartData.length == 0) {
+        return;
+    }
+    option.value.legend.data = props.chartData.communityNameList;
+    option.value.xAxis[0].data = props.chartData.xaxisData;
+    for (let index = 0; index < props.chartData.yaxisData.length; index++) {
+        const xData = props.chartData.yaxisData[index];
         option.value.series.push({
-            name: chartData.value.communityNameList[index],
+            name: props.chartData.communityNameList[index],
             type: 'line',
             stack: 'Total',
             smooth: true,
@@ -134,13 +133,13 @@ const getRandomColor = (index: number, lineIndex: number) => {
     }
 }
 
-watch(chartData, () => {
+watch(props, () => {
     //清空之前的数据
     option.value.legend.data = [];
     option.value.xAxis[0].data = [];
     option.value.series = [];
     drawCharts()
-});
+}, { deep: true });
 
 onMounted(() => {
     initCharts()

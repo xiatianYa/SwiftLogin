@@ -47,29 +47,28 @@
 import personnelEcharts from "@/components/baseUI/personnelEcharts/index.vue";
 import personnelCake from "@/components/baseUI/personnelCake/index.vue";
 import useStore from "@/store";
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { statisticsEchats } from '@/api/statistics';
 import { NTimeline, NTimelineItem, NCard, NSpace, NResult } from 'naive-ui';
 let { globalStore } = useStore();
 
-const personnelData = ref()
+const personnelData = ref([])
 const personnelCakeData = ref<any>([])
 const personnelTimer = ref()
 const init = async () => {
     let statisticsResult: any = await statisticsEchats();
     personnelData.value = statisticsResult.data;
-    //设置每5秒获取一次表格数据
     personnelTimer.value = setInterval(async () => {
         let statisticsResult: any = await statisticsEchats();
         personnelData.value = statisticsResult.data;
-    }, 5000);
+    }, 10000)
 }
 
 watch(() => globalStore.serverInfo, async (newValue: any, oldValue: any) => {
     if (!newValue) {
         return;
     }
-    personnelCakeData.value = []
+    personnelCakeData.value = [];
     globalStore.serverInfo.forEach((value: any, key: any) => {
         let countPersonnel = 0;
         let responsePromise = JSON.parse(value)
@@ -84,7 +83,9 @@ watch(() => globalStore.serverInfo, async (newValue: any, oldValue: any) => {
         personnelCakeData.value.push(countPersonnel);
     })
 }, { deep: true })
-
+onUnmounted(() => {
+    clearInterval(personnelTimer.value);
+})
 onMounted(() => {
     init();
 })
