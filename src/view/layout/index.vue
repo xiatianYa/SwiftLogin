@@ -20,7 +20,7 @@ onMounted(() => {
     //通知
     // notification["warning"]({
     //     content: "更新通知",
-    //     meta: "网页版本登录器将于2024/9/01 13:00:00 -> 2024/09/01 15:30:00 预计更新完成,问题反馈请加QQ群901243791",
+    //     meta: "网页版本登录器将于2024/9/07 14:00 -> 未知,将新增首页模块,问题反馈可加反馈群901243791,欢迎大家提供意见。",
     //     keepAliveOnHover: true,
     // });
     globalStore.initGameSocket()

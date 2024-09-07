@@ -14,7 +14,7 @@
         <!-- 搜索 -->
         <div class="d_flex d_flex_sb mb-20">
             <n-select class="mr-10" v-model:value="queryParams.communityId" :options="selectOption.community"
-                placeholder="请选择社区" clearable @update:value="handleUpdateValue" />
+                placeholder="请选择社区" @update:value="handleUpdateValue" />
             <n-select class="mr-10" v-model:value="queryParams.modeId" :options="selectOption.mode" placeholder="请选择模式"
                 clearable @update:value="handleUpdateValue" />
             <n-button class="mr-10" strong secondary type="primary" :render-icon="renderIcon(MapOutline)"
@@ -115,9 +115,9 @@
                         <n-select style="width: 150px;" v-model:value="mapInfo.label" filterable placeholder="选择地图"
                             :disabled="globalStore.isAutoMap" :options="selectOption.map"
                             @update:value="handleUpdateMapValue" />
-                        <n-select style="width: 150px;" v-model:value="MapCommunityId" :options="selectOption.community"
-                            placeholder="请选择社区" />
-                        <n-button type="success" @click="appendMap">添加</n-button>
+                        <n-select style="width: 150px;" v-model:value="MapCommunityId" :disabled="globalStore.isAutoMap"
+                            :options="selectOption.community" placeholder="请选择社区" clearable />
+                        <n-button :disabled="globalStore.isAutoMap" type="success" @click="appendMap">添加</n-button>
                     </n-space>
                     <n-space>
                         <n-scrollbar style="max-height: 450px">
