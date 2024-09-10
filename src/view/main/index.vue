@@ -1,10 +1,10 @@
 <template>
     <div class="mainPage p-20">
         <div class="main-left mr-10">
-            <n-card class="echarts">
+            <n-card class="echarts mb-10">
                 <personnelEcharts :chartData="personnelData"></personnelEcharts>
             </n-card>
-            <n-card class="timeline mt-10">
+            <n-card class="timeline mb-10">
                 <n-space>
                     <span style="font-size: 16px;font-weight: bold;">
                         项目动态
@@ -22,17 +22,22 @@
                     <n-timeline-item type="success" content="删除挂机模式(防止恶意挂机) v0.0.8" time="2024-09-05" />
                     <n-timeline-item type="success" content="优化地图订阅,实现多图,社区勾选,优化聊天室功能 v0.0.9" time="2024-09-06" />
                     <n-timeline-item type="success" content="新增首页模块,数据可视化屏幕 v0.1.0" time="2024-09-07" />
-                    <n-timeline-item type="success" content="新增首页模块,数据可视化屏幕 v0.1.0" time="2024-09-07" />
-                    <n-timeline-item content="新增登录器软件,无需浏览器版本 v0.1.1" time="待定" line-type="dashed" />
-                    <n-timeline-item content="新增订图公告(各位大佬订图可在这里添加) v0.1.2" time="待定" line-type="dashed" />
+                    <n-timeline-item type="success" content="修改前同事的狗屎代码组件,我就不应该用你的组件,我测测测死你的🐎 v0.1.1"
+                        time="2024-09-07" />
+                    <n-timeline-item type="success" content="优化地图订阅,可删除订阅地图,浏览器刷新后之前订阅的地图不会删除 v0.1.2"
+                        time="2024-09-10" />
+                    <n-timeline-item content="新增订图公告(各位大佬订图可在这里添加) v0.1.3" time="待定" line-type="dashed" />
+                    <n-timeline-item content="新增留言版(保留三天) v0.1.3" time="待定" line-type="dashed" />
+                    <n-timeline-item content="新增直播推荐 v0.1.3" time="待定" line-type="dashed" />
+                    <n-timeline-item content="新增登录器软件,无需浏览器版本 v0.1.3" time="待定" line-type="dashed" />
                 </n-timeline>
             </n-card>
         </div>
         <div class="main-right ml-10">
-            <n-card class="echarts">
+            <n-card class="echarts mb-10">
                 <personnelCake :chartData="personnelCakeData"></personnelCake>
             </n-card>
-            <n-card class="echarts mt-10">
+            <n-card class="echarts mb-10">
                 <n-result status="404" title="让我想想这里应该放啥呢?" description="生活总归带点荒谬">
                     <template #footer>
                         <n-button></n-button>

@@ -5,7 +5,7 @@ function stringToBoolean(str: any): boolean {
   } else if (typeof str === "string" && str.toLowerCase() === "false") {
     return false;
   }
-  return false;
+  return true;
 }
 //判断传入时间是否在三小时内
 function isWithinThreeHours(dateToCheck: any) {
@@ -25,6 +25,12 @@ function isWithinThreeHours(dateToCheck: any) {
   // 判断时间差是否小于或等于3小时
   return diffHours <= 3;
 }
-
+function stringToObject(str: any): string {
+  console.log(str);
+  if (str) {
+    return str;
+  }
+  return "[]";
+}
 // 导出函数
-export { stringToBoolean,isWithinThreeHours };
+export { stringToBoolean, isWithinThreeHours, stringToObject };

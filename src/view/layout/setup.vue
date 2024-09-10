@@ -78,8 +78,9 @@
                     style="display: flex;width: 100%;" :line-clamp="1">
                     {{ item.fromUserNickName }}
                   </n-ellipsis>
-                  <n-ellipsis style="background-color: #fff;color: black;border-radius: 7px;" :line-clamp="2"
-                    class="p-5">
+                  <n-ellipsis
+                    :style="globalStore.nightCycle ? 'background-color: black;color: #fff;' : 'background-color: #fff;color: black;'"
+                    style="border-radius: 7px;" :line-clamp="2" class="p-5">
                     {{ item.data }}
                   </n-ellipsis>
                 </div>

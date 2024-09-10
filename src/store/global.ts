@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { stringToBoolean } from "@/utils/common";
+import { stringToBoolean,stringToObject } from "@/utils/common";
 import gameSocket from "@/utils/gameSocket";
 import chatSocket from "@/utils/chatSocket";
 //用户对象
@@ -16,7 +16,7 @@ export interface Global {
   //挤服信息
   automaticInfo: any;
   //地图订阅信息
-  autoMapListInfo: Array<any>;
+  autoMapListInfo: any;
   //挤服次数
   automaticCount: number;
   //白天 黑夜模式
@@ -38,7 +38,7 @@ export const useGloBalStore = defineStore("global", {
       isAutomatic: false,
       isAutoMap: false,
       automaticInfo: null,
-      autoMapListInfo: [],
+      autoMapListInfo:JSON.parse(stringToObject(localStorage.getItem("autoMap"))),
       automaticCount: 0,
       serverInfo: null,
       nightCycle: stringToBoolean(localStorage.getItem("nightCycle")),
@@ -72,3 +72,4 @@ export const useGloBalStore = defineStore("global", {
     },
   },
 });
+

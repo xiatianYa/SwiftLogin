@@ -16,7 +16,7 @@
                 <div class="d_flex mb-10">
                     <n-select class="mr-5" v-model:value="queryParam.tag" :options="selectOption.tag"
                         placeholder="请选择标签" clearable />
-                    <n-input class="mr-5" v-model:value="queryParam.label" placeholder="请输入地图名称(译名)" clearable />
+                    <n-input class="mr-5" v-model:value="queryParam.label" placeholder="请输入地图名称译名" clearable />
                 </div>
             </div>
             <div style="width: 10%;" class="d_flex flex-wrap pl-40">

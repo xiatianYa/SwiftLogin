@@ -139,6 +139,10 @@
                                             v-for="item in mapInfo?.tagName?.split(',').filter((item: any) => item != null && item != '')">{{
                                                 item }}</n-tag>
                                     </div>
+                                    <div class="mt-5">
+                                        <n-button size="small" type="error"
+                                            @click="removeMap(mapInfo.value)">删除此地图</n-button>
+                                    </div>
                                 </div>
                             </div>
                         </n-scrollbar>
@@ -171,7 +175,6 @@
                                     配置要点：<br>
                                     仅需选择“地图”即可启用此功能。<br>
                                     需要浏览器通知权限(重点)<br>
-                                    只能订阅你目前勾选的社区进行订阅(页面所展示的服务器)!<br>
                                 </span>
                             </n-popover>
                         </div>
@@ -500,6 +503,13 @@ const appendMap = () => {
         }
     }
     globalStore.autoMapListInfo.push(mapInfo.value)
+    localStorage.setItem("autoMap", JSON.stringify(globalStore.autoMapListInfo))
+}
+
+//删除地图订阅
+const removeMap = (value: string) => {
+    globalStore.autoMapListInfo = globalStore.autoMapListInfo.filter(item => item.value !== value);
+    localStorage.setItem("autoMap", JSON.stringify(globalStore.autoMapListInfo))
 }
 
 //打开地图订阅

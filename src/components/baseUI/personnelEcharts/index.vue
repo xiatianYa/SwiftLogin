@@ -91,29 +91,6 @@ const drawCharts = () => {
         option.value.series.push({
             name: props.chartData.communityNameList[index],
             type: 'line',
-            stack: 'Total',
-            smooth: true,
-            lineStyle: {
-                width: 0
-            },
-            showSymbol: false,
-            label: {
-                show: true,
-                position: 'top'
-            },
-            areaStyle: {
-                opacity: 1,
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 0.7, [
-                    {
-                        offset: 0,
-                        color: getRandomColor(index, 0)
-                    },
-                    {
-                        offset: 1,
-                        color: getRandomColor(index, 1)
-                    }
-                ])
-            },
             emphasis: {
                 focus: 'series'
             },
