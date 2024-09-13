@@ -39,11 +39,32 @@
                 <personnelCake :chartData="personnelCakeData"></personnelCake>
             </n-card>
             <n-card class="echarts mb-10">
-                <n-result status="404" title="让我想想这里应该放啥呢?" description="生活总归带点荒谬">
-                    <template #footer>
-                        <n-button></n-button>
-                    </template>
-                </n-result>
+                <n-space>
+                    <span style="font-size: 16px;font-weight: bold;">
+                        在线用户
+                    </span>
+                </n-space>
+                <n-space>
+                    <n-tooltip placement="top-start" trigger="hover" v-for="user in globalStore.onlineUserList">
+                        <template #trigger>
+                            <n-avatar class="mr-5 mt-5" round size="medium" :src="user.src" />
+                        </template>
+                        {{ user.name }}
+                    </n-tooltip>
+                </n-space>
+            </n-card>
+            <n-card class="echarts mb-10">
+                <n-space>
+                    <span style="font-size: 16px;font-weight: bold;">
+                        赞赏码
+                    </span>
+                </n-space>
+                <n-space>
+                    <n-image width="100%" height="200"
+                        src="https://bluearchive.top:9500/statics/2024/09/13/zanshangma.png" />
+                    <n-image width="100%" height="200"
+                        src="https://bluearchive.top:9500/statics/2024/09/13/taofanma.png" />
+                </n-space>
             </n-card>
         </div>
     </div>
@@ -55,18 +76,37 @@ import personnelCake from "@/components/baseUI/personnelCake/index.vue";
 import useStore from "@/store";
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { statisticsEchats } from '@/api/statistics';
-import { NTimeline, NTimelineItem, NCard, NSpace, NResult } from 'naive-ui';
+import { NTimeline, NTimelineItem, NCard, NSpace, NImage, NAvatar, NTooltip } from 'naive-ui';
+import { getUserList } from "@/api/chat";
 let { globalStore } = useStore();
 
+//在线人数配置
 const personnelData = ref([])
+
+//饼图配置
 const personnelCakeData = ref<any>([])
+
+//在线人数定时任务
 const personnelTimer = ref()
+
 const init = async () => {
     let statisticsResult: any = await statisticsEchats();
     personnelData.value = statisticsResult.data;
     personnelTimer.value = setInterval(async () => {
+        //获取在线人数数据
         let statisticsResult: any = await statisticsEchats();
         personnelData.value = statisticsResult.data;
+        //获取在线用户数据
+        getUserList().then((res) => {
+            globalStore.onlineUserList = res.data.map((item: any) => {
+                let { userId, userAvatar, userNickName } = item;
+                return {
+                    id: userId,
+                    name: userNickName,
+                    src: userAvatar,
+                };
+            });
+        });
     }, 10000)
 }
 

@@ -5,7 +5,7 @@ axios.defaults.headers["Content-Type"] = "application/json;charset=utf-8";
 const service = axios.create({
   baseURL: "/api",
   // 超时
-  timeout: 10000,
+  timeout: 20000,
   //重试次数
 });
 // request拦截器

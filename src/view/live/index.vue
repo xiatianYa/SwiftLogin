@@ -14,12 +14,12 @@
                         <n-image width="100%" height="100%" :src="'data:image/jpeg;base64,' + live.coverByte"
                             :preview-disabled="true" />
                         <div class="overlay"
-                            :style="showStatusId != live.roomId && live.liveStatus != 2 ? 'display: none;' : ''"></div>
+                            :style="showStatusId != live.roomId && live.online ? 'display: none;' : ''"></div>
                         <div class="status">
-                            <span v-if="showStatusId == live.roomId && live.liveStatus == 1">
+                            <span v-if="showStatusId == live.roomId && live.online">
                                 进入直播间
                             </span>
-                            <span v-if="live.liveStatus == 2">
+                            <span v-if="!live.online">
                                 未开播
                             </span>
                         </div>
