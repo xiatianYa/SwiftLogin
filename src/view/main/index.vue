@@ -26,10 +26,11 @@
                         time="2024-09-07" />
                     <n-timeline-item type="success" content="优化地图订阅,可删除订阅地图,浏览器刷新后之前订阅的地图不会删除 v0.1.2"
                         time="2024-09-10" />
-                    <n-timeline-item content="新增订图公告(各位大佬订图可在这里添加) v0.1.3" time="待定" line-type="dashed" />
-                    <n-timeline-item content="新增留言版(保留三天) v0.1.3" time="待定" line-type="dashed" />
-                    <n-timeline-item content="新增直播推荐 v0.1.3" time="待定" line-type="dashed" />
-                    <n-timeline-item content="新增登录器软件,无需浏览器版本 v0.1.3" time="待定" line-type="dashed" />
+                    <n-timeline-item type="success" content="新增直播推荐(大主播入驻请加反馈群),修复自动挤服Bug(特性) v0.1.3"
+                        time="2024-09-12" />
+                    <n-timeline-item content="新增订图公告(各位大佬订图可在这里添加) v0.1.4" time="待定" line-type="dashed" />
+                    <n-timeline-item content="新增留言版(保留三天) v0.1.5" time="待定" line-type="dashed" />
+                    <n-timeline-item content="新增登录器软件,无需浏览器版本 v0.1.6" time="待定" line-type="dashed" />
                 </n-timeline>
             </n-card>
         </div>

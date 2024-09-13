@@ -11,7 +11,7 @@
         </svg>
       </div>
     </transition>
-    <!-- 地图订阅 -->
+    <!-- 系统设置 -->
     <n-drawer v-model:show="setDialog" :width="500" placement="right">
       <n-drawer-content title="系统设置">
         <n-card :bordered="false">
@@ -34,6 +34,10 @@
             <n-button class="mr-10" strong secondary type="success" :render-icon="renderIcon(SaveOutline)"
               @click="saveSet">
               保存设置
+            </n-button>
+            <n-button class="mr-10" strong secondary type="error" :render-icon="renderIcon(SaveOutline)"
+              @click="clearCache">
+              清除缓存
             </n-button>
           </n-space>
         </n-card>
@@ -221,6 +225,14 @@ const saveSet = () => {
     localStorage.removeItem("nightCycle")
   }
   message.success("设置成功")
+}
+
+//清除浏览器缓存
+const clearCache = () => {
+  //清空浏览器缓存
+  localStorage.clear();
+  message.success("清除浏览器缓存成功");
+  location.replace(location.href);
 }
 
 //打开聊天室

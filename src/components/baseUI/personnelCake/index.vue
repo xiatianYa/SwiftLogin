@@ -18,6 +18,7 @@ const charts = ref();
 
 let option = ref<any>(
     {
+        color: ['#80FFA5', '#00DDFF', '#37A2FF', '#FF0087', '#FFBF00'],
         tooltip: {
             trigger: 'item'
         },

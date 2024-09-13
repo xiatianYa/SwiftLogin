@@ -26,7 +26,6 @@ function isWithinThreeHours(dateToCheck: any) {
   return diffHours <= 3;
 }
 function stringToObject(str: any): string {
-  console.log(str);
   if (str) {
     return str;
   }

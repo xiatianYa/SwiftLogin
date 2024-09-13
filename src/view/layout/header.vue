@@ -65,6 +65,7 @@ import {
     PeopleCircleOutline as PeopleCircleIcon,
     PersonCircleSharp as PersonCircleIcon,
     LogOutOutline as LogoutIcon,
+    VideocamOutline as VideocamIcon
 } from '@vicons/ionicons5'
 import { oauthLogin } from "@/api/user";
 import { setExpiresIn, setToken } from "@/utils/auth";
@@ -194,6 +195,23 @@ const menuOptions: MenuOption[] = [
             ),
         key: 'map',
         icon: renderIcon(MapIcon)
+    },
+    {
+        label: () =>
+            h(
+                RouterLink,
+                {
+                    to: {
+                        name: 'live',
+                        params: {
+                            lang: 'zh-CN'
+                        }
+                    }
+                },
+                { default: () => '直播推荐' }
+            ),
+        key: 'live',
+        icon: renderIcon(VideocamIcon)
     },
     {
         label: () =>

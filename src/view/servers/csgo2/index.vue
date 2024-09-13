@@ -58,7 +58,7 @@
                     </n-space>
                     <n-space class="mb-10" vertical>
                         <n-input-number class="mb-5" v-model:value="globalStore.automaticInfo.minPlayers"
-                            :disabled="globalStore.isAutomatic" placeholder="最小玩家数 (小于或于时自动进入服务器)" :min="0" clearable>
+                            :disabled="globalStore.isAutomatic" placeholder="最小玩家数 (小于或于时自动进入服务器)" :min="0" :max="globalStore.automaticInfo.maxPlayers" clearable>
                             <template #minus-icon>
                                 <n-icon :component="ArrowDownCircleOutline" />
                             </template>
@@ -502,13 +502,15 @@ const appendMap = () => {
             return;
         }
     }
-    globalStore.autoMapListInfo.push(mapInfo.value)
-    localStorage.setItem("autoMap", JSON.stringify(globalStore.autoMapListInfo))
+    globalStore.autoMapListInfo.push(mapInfo.value);
+    localStorage.removeItem("autoMap");
+    localStorage.setItem("autoMap", JSON.stringify(globalStore.autoMapListInfo));
 }
 
 //删除地图订阅
 const removeMap = (value: string) => {
-    globalStore.autoMapListInfo = globalStore.autoMapListInfo.filter(item => item.value !== value);
+    globalStore.autoMapListInfo = globalStore.autoMapListInfo.filter((item: any) => item.value !== value);
+    localStorage.removeItem("autoMap");
     localStorage.setItem("autoMap", JSON.stringify(globalStore.autoMapListInfo))
 }
 
@@ -843,7 +845,7 @@ watch(() => serverData.value, (newValue: any, oldValue: any) => {
     }
     //当打开抽屉地图信息时 
     if (globalStore.automaticInfo) {
-        let mapResult = newValue.find((item: any) => item.map === globalStore.automaticInfo.map)
+        let mapResult = newValue.find((item: any) => item.ip + item.port === globalStore.automaticInfo.ip + globalStore.automaticInfo.port)
         globalStore.automaticInfo = { ...globalStore.automaticInfo, ...mapResult }
     }
 }, { deep: true })

@@ -100,16 +100,6 @@ const drawCharts = () => {
     charts.value.drawCharts();
 }
 
-const getRandomColor = (index: number, lineIndex: number) => {
-    let colorList01 = ['rgb(128, 255, 165)', 'rgb(0, 221, 255)', 'rgb(55, 162, 255)', 'rgb(255, 0, 135)', 'rgb(255, 191, 0)']
-    let colorList02 = ['rgb(1, 191, 236)', 'rgb(77, 119, 255)', 'rgb(116, 21, 219)', 'rgb(135, 0, 157)', 'rgb(224, 62, 76)']
-    if (lineIndex) {
-        return colorList01[index]
-    } else {
-        return colorList02[index]
-    }
-}
-
 watch(props, () => {
     //清空之前的数据
     option.value.legend.data = [];
