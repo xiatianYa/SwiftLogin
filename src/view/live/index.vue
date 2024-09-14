@@ -2,7 +2,13 @@
     <div class="livePage p-20">
         <!-- 标题 -->
         <div class="d_flex_ac d_flex_sb mb-20">
-            <div class="title">直播推荐</div>
+            <n-space style="align-items: center;" justify="space-between" @click="openJoin">
+                <div class="title">直播推荐</div>
+                <n-button class="ml-20" strong secondary type="success" size="small"
+                    :render-icon="renderIcon(PersonAddOutline)" v-show="userStore.id">
+                    大主播入驻
+                </n-button>
+            </n-space>
         </div>
         <!-- 主体 -->
         <n-spin :show="loading" :size="'large'" style="min-height: 50vh;">
@@ -11,8 +17,7 @@
                     @click="goHref(live.liveUrl)">
                     <div class="image-container" @mouseover="showStatusId = live.roomId"
                         @mouseleave="showStatusId = null">
-                        <n-image width="100%" height="100%" :src="'data:image/jpeg;base64,' + live.coverByte"
-                            :preview-disabled="true" />
+                        <n-image width="100%" height="100%" :src="live.bgUrl" :preview-disabled="true" />
                         <div class="overlay"
                             :style="showStatusId != live.roomId && live.online ? 'display: none;' : ''"></div>
                         <div class="status">
@@ -32,7 +37,7 @@
 
                     <div class="p-10 d_flex">
                         <div class="d_flex_ac">
-                            <n-avatar round size="medium" :src="'data:image/jpeg;base64,' + live.userCoverByte" />
+                            <n-avatar round size="medium" :src="live.avatarUrl" />
                         </div>
                         <div style="width: 100%;" class="ml-10">
                             <n-ellipsis :line-clamp="1">
@@ -55,17 +60,45 @@
                 </n-card>
             </div>
         </n-spin>
+        <!-- 主播入驻申请框 -->
+        <n-modal v-model:show="joinShow" transform-origin="center">
+            <resuse-form ref="formRef" class="formClass" :formData="joinData" :rules="rules" :formOption="formOption"
+                labelPosition="right" labelWidth="140">
+                <template #Footer>
+                    <n-space>
+                        <n-button secondary round @click="joinShow = false">
+                            取消
+                        </n-button>
+                        <n-button type="info" secondary round @click="joinSubmit">
+                            提交
+                        </n-button>
+                    </n-space>
+                </template>
+            </resuse-form>
+        </n-modal>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, h, Component, onMounted } from 'vue';
-import { listLive } from '@/api/live';
-import { NImage, NSpace, NAvatar, NIcon, NSpin, NEllipsis, NCard } from 'naive-ui';
+import useStore from "@/store";
+import resuseForm from '@/components/reuseForm/index.vue'
+import { ref, h, Component, onMounted, reactive } from 'vue';
+import { addLive, listLive } from '@/api/live';
+import { NImage, NSpace, NAvatar, NIcon, NSpin, NEllipsis, NCard, NButton, NModal, useMessage } from 'naive-ui';
+import { PersonAddOutline } from '@vicons/ionicons5';
 import { EyeOutline } from '@vicons/ionicons5'
 
+//全局仓库
+let { userStore } = useStore();
+
+//消息对象
+const message = useMessage();
+
+//表单
+const formRef = ref();
+
 //数据列表
-const liveData = ref<any>([])
+const liveData = ref<any>({});
 
 //是否在加载
 const loading = ref(false);
@@ -73,15 +106,66 @@ const loading = ref(false);
 //是否显示进入直播间
 const showStatusId = ref(null);
 
+//主播入驻框是否显示
+const joinShow = ref(false);
+
+//主播入驻表达数据
+const joinData = ref<any>({});
+
+//表单配置项
+const formOption = reactive([
+    {
+        type: "input", props: "uid", label: "直播间uid", placeholder: "请输入直播间uid"
+    },
+    {
+        type: "slot", slotName: "Footer"
+    }
+]);
+
+const rules = ref({
+    uid: {
+        required: true,
+        trigger: ['blur', '直播间uid'],
+        message: '请输入直播间uid'
+    }
+})
+
 //配置项初始化
 const optionInit = async () => {
 }
+
+//注册图标
+const renderIcon = (icon: Component) => {
+    return () => h(NIcon, null, { default: () => h(icon) })
+}
+
+//打开主播入驻
+const openJoin = () => {
+    joinShow.value = true;
+    joinData.value = {};
+}
+
 //数据初始化
 const init = async () => {
     let liveResult: any = await listLive();
     liveData.value = liveResult.data;
     loading.value = false;
-    console.log(liveData.value);
+}
+
+//新增主播入驻
+const joinSubmit = () => {
+    formRef.value?.ruleFormRef().validate(async (errors: any) => {
+        if (!errors) {
+            let liveResult: any = await addLive(joinData.value);
+            if (liveResult.code == 200) {
+                message.success("入驻成功")
+                init();
+            } else {
+                message.error(liveResult.msg)
+            }
+            joinShow.value = false;
+        }
+    })
 }
 
 //前往直播间

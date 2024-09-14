@@ -51,9 +51,11 @@ import reusePagination from '@/components/reusePagination/index.vue'
 import { ref, h, Component, onMounted } from 'vue';
 import { listModeEnum, listTagEnum, listTypeEnum } from '@/api/enum'
 import { listMap } from '@/api/map'
-import { NSelect, NButton, NIcon, NInput, NTag, NImage } from 'naive-ui';
-import { Search, TrashOutline } from '@vicons/ionicons5';
+import { NSelect, NButton, NIcon, NInput, NTag, NImage,useNotification } from 'naive-ui';
+import { Search, TrashOutline,CopyOutline } from '@vicons/ionicons5';
 import { CustomType } from '@/types';
+//消息弹出框
+const notification = useNotification()
 //数据加载
 const loading = ref(false)
 //地图数据
@@ -125,6 +127,30 @@ const mapColumns = ref([
             }) : ""
             )
         }
+    },
+    {
+        title: '操作',
+        key: 'actions',
+        render(row: any) {
+            return h(
+                'div', // 或者任何你想要的容器元素，这里用 div 作为示例  
+                [
+                    h(
+                        NButton,
+                        {
+                            strong: true,
+                            tertiary: true,
+                            size: 'small',
+                            type: 'info',
+                            style: { marginRight: '10px' },
+                            renderIcon: renderIcon(CopyOutline),
+                            onClick: () => onCopy(row)
+                        },
+                        { default: () => '复制地图名称' }
+                    ),
+                ]
+            );
+        },
     }
 ])
 //分页对象
@@ -239,6 +265,25 @@ const onSearch = async () => {
     queryParam.value.count = Math.ceil(mapResult.total / pageSize)
 }
 
+//复制连接指令
+const onCopy = async (row: any) => {
+    try {
+        await navigator.clipboard.writeText(row.name);
+        notification.success({
+            content: '复制成功',
+            meta: '已复制地图名称.',
+            duration: 1500,
+            keepAliveOnHover: true
+        })
+    } catch (err) {
+        notification.error({
+            content: '复制失败',
+            meta: '复制地图名称失败.',
+            duration: 1500,
+            keepAliveOnHover: true
+        })
+    }
+}
 
 //配置项初始化
 const optionInit = async () => {
@@ -262,6 +307,7 @@ const optionInit = async () => {
         label: value
     }));
 }
+
 //数据初始化
 const init = async () => {
     //查询地图

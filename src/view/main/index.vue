@@ -90,8 +90,20 @@ const personnelCakeData = ref<any>([])
 const personnelTimer = ref()
 
 const init = async () => {
+    //获取在线人数数据
     let statisticsResult: any = await statisticsEchats();
     personnelData.value = statisticsResult.data;
+    //获取在线用户数据
+    getUserList().then((res) => {
+        globalStore.onlineUserList = res.data.map((item: any) => {
+            let { userId, userAvatar, userNickName } = item;
+            return {
+                id: userId,
+                name: userNickName,
+                src: userAvatar,
+            };
+        });
+    });
     personnelTimer.value = setInterval(async () => {
         //获取在线人数数据
         let statisticsResult: any = await statisticsEchats();

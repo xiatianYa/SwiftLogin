@@ -65,11 +65,13 @@ import {
     PeopleCircleOutline as PeopleCircleIcon,
     PersonCircleSharp as PersonCircleIcon,
     LogOutOutline as LogoutIcon,
-    VideocamOutline as VideocamIcon
+    VideocamOutline as VideocamIcon,
+    Menu as MenuIcon
 } from '@vicons/ionicons5'
 import { oauthLogin } from "@/api/user";
 import { setExpiresIn, setToken } from "@/utils/auth";
 import { useRouter } from "vue-router";
+
 
 //全局仓库
 let { globalStore, userStore } = useStore()
@@ -212,6 +214,73 @@ const menuOptions: MenuOption[] = [
             ),
         key: 'live',
         icon: renderIcon(VideocamIcon)
+    },
+    {
+        label: '社区导航',
+        key: 'community_menu',
+        icon: renderIcon(MenuIcon),
+        children: [
+            {
+                label: () =>
+                    h(
+                        'a',
+                        {
+                            href: 'https://darkrp.cn/',
+                            target: '_blank',
+                        },
+                        'EXG社区'
+                    ),
+                key: 'exg',
+            },
+            {
+                label: () =>
+                    h(
+                        'a',
+                        {
+                            href: 'https://csgo.moeub.cn',
+                            target: '_blank',
+                        },
+                        'UB社区'
+                    ),
+                key: 'ub',
+            },
+            {
+                label: () =>
+                    h(
+                        'a',
+                        {
+                            href: 'https://zombieden.cn/',
+                            target: '_blank',
+                        },
+                        'ZED社区'
+                    ),
+                key: 'zed',
+            },
+            {
+                label: () =>
+                    h(
+                        'a',
+                        {
+                            href: 'https://fyscs.com/',
+                            target: '_blank',
+                        },
+                        'FYS社区'
+                    ),
+                key: 'fys',
+            },
+            {
+                label: () =>
+                    h(
+                        'a',
+                        {
+                            href: 'https://servers.upkk.com',
+                            target: '_blank',
+                        },
+                        '93X社区'
+                    ),
+                key: '93x',
+            },
+        ]
     },
     {
         label: () =>
