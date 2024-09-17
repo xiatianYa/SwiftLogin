@@ -19,12 +19,13 @@
       <n-drawer-content title="系统设置">
         <n-card :bordered="false">
           <n-space vertical>
-            <n-select class="mb-10" v-model:value="communityId" :options="selectOption.community" placeholder="请选择指定社区"
-              clearable />
+            <n-select class="mb-10" v-model:value="communityId" :options="selectOption.community"
+                      placeholder="请选择指定社区"
+                      clearable/>
             <n-select class="mb-10" v-model:value="modeId" :options="selectOption.mode" placeholder="请选择指定模式"
-              clearable />
+                      clearable/>
             <n-switch class="mb-10" size="large" v-model:value="globalStore.nightCycle" :on-update:value="handleCycle"
-              :default-value="globalStore.nightCycle" :round="false">
+                      :default-value="globalStore.nightCycle" :round="false">
               <template #checked-icon>
                 🌞
               </template>
@@ -35,11 +36,11 @@
           </n-space>
           <n-space>
             <n-button class="mr-10" strong secondary type="success" :render-icon="renderIcon(SaveOutline)"
-              @click="saveSet">
+                      @click="saveSet">
               保存设置
             </n-button>
             <n-button class="mr-10" strong secondary type="error" :render-icon="renderIcon(SaveOutline)"
-              @click="clearCache">
+                      @click="clearCache">
               清除缓存
             </n-button>
           </n-space>
@@ -59,7 +60,7 @@
                 <template #avatar="{ option: { name, src } }">
                   <n-tooltip>
                     <template #trigger>
-                      <n-avatar :src="src" />
+                      <n-avatar :src="src"/>
                     </template>
                     {{ name }}
                   </n-tooltip>
@@ -77,17 +78,17 @@
           <div class="drawer-content-chat">
             <n-scrollbar style="max-height: 600px" ref="virtualListInst">
               <div v-for="item, index in globalStore.chatHistory"
-                :class="item.fromUserId == userStore.id ? 'itemTwo' : 'itemOne'">
-                <n-avatar round :size="32" :src="item.fromUserAvatar" class="avatar" />
+                   :class="item.fromUserId == userStore.id ? 'itemTwo' : 'itemOne'">
+                <n-avatar round :size="32" :src="item.fromUserAvatar" class="avatar"/>
                 <div>
                   <n-ellipsis
-                    :style="item.fromUserId == userStore.id ? 'justify-content:flex-end;' : 'justify-content:flex-start;'"
-                    style="display: flex;width: 100%;" :line-clamp="1">
+                      :style="item.fromUserId == userStore.id ? 'justify-content:flex-end;' : 'justify-content:flex-start;'"
+                      style="display: flex;width: 100%;" :line-clamp="1">
                     {{ item.fromUserNickName }}
                   </n-ellipsis>
                   <n-ellipsis
-                    :style="globalStore.nightCycle ? 'background-color: black;color: #fff;' : 'background-color: #fff;color: black;'"
-                    style="border-radius: 7px;" :line-clamp="2" class="p-5">
+                      :style="globalStore.nightCycle ? 'background-color: black;color: #fff;' : 'background-color: #fff;color: black;'"
+                      style="border-radius: 7px;" :line-clamp="2" class="p-5">
                     {{ item.data }}
                   </n-ellipsis>
                 </div>
@@ -98,10 +99,38 @@
         <template #footer>
           <div class="drawer-footer-bottom">
             <n-input v-model:value="inputMsg" style="width: 300px;" round placeholder="请输入聊天内容" clearable
-              @keydown.enter="sendMsgAll()" />
+                     @keydown.enter="sendMsgAll()"/>
             <n-button round @click="sendMsgAll()">
               发送
             </n-button>
+          </div>
+        </template>
+      </n-drawer-content>
+    </n-drawer>
+    <!--留言板-->
+    <n-drawer v-model:show="leaveShow" :width="500" placement="left">
+      <n-drawer-content body-content-class="content">
+        <template #header>
+          <div class="drawer-header-leave-title">
+            <div class="ml-20 leave-header">
+              <div class="chose-type">
+                <n-radio-group v-model:value="curLeave">
+                  <n-space>
+                    <n-radio-button v-for="item in lstLeaveType" :key="item.value" :value="item.value" style="padding: 8px;">
+                      {{ item.label }}
+                    </n-radio-button>
+                  </n-space>
+                </n-radio-group>
+              </div>
+              <n-button class="ml-100" type="primary">新增留言</n-button>
+            </div>
+          </div>
+        </template>
+        <template #default>
+          <div class="drawer-content-chat">
+            <n-scrollbar style="max-height: 600px" ref="virtualListInst">
+
+            </n-scrollbar>
           </div>
         </template>
       </n-drawer-content>
@@ -111,15 +140,34 @@
 <script setup lang="ts">
 import useStore from "@/store";
 import chatEnum from "@/utils/chatEnum";
-import { ref, onMounted, Component, h, nextTick, watch } from 'vue'
-import { NSelect, NInput, NEllipsis, NScrollbar, NDrawer, NDrawerContent, NCard, NSpace, useMessage, NButton, NIcon, NSwitch, NAvatarGroup, NTooltip, NAvatar, VirtualListInst } from 'naive-ui';
-import { SaveOutline, MailOutline } from '@vicons/ionicons5';
-import { CustomType } from '@/types';
-import { listModeEnum } from '@/api/enum'
-import { listCommunity } from '@/api/community'
+import {ref, onMounted, Component, h, nextTick, watch} from 'vue'
+import {
+  NSelect,
+  NInput,
+  NEllipsis,
+  NScrollbar,
+  NDrawer,
+  NDrawerContent,
+  NCard,
+  NSpace,
+  useMessage,
+  NButton,
+  NIcon,
+  NSwitch,
+  NAvatarGroup,
+  NTooltip,
+  NAvatar,
+  NRadioGroup,
+  NRadioButton,
+  VirtualListInst
+} from 'naive-ui';
+import {SaveOutline, MailOutline} from '@vicons/ionicons5';
+import {CustomType, LeaveType} from '@/types';
+import {listLeaveTypeEnum, listModeEnum} from '@/api/enum'
+import {listCommunity} from '@/api/community'
 
 //全局仓库
-let { globalStore, userStore } = useStore();
+let {globalStore, userStore} = useStore();
 
 //聊天室是否显示
 const chartShow = ref(false)
@@ -145,6 +193,10 @@ const modeId = ref<any>(null)
 //抽屉
 const setDialog = ref(false);
 
+let lstLeaveType = ref<LeaveType[]>([]);
+
+let curLeave = ref(0)
+
 //select配置项
 const selectOption = ref<CustomType>({
   //社区列表
@@ -160,14 +212,14 @@ const handleCycle = (value: boolean) => {
 
 //创建头像群组
 const createDropdownOptions = (options: Array<{ name: string, src: string }>) =>
-  options.map(option => ({
-    key: option.name,
-    label: option.name
-  }))
+    options.map(option => ({
+      key: option.name,
+      label: option.name
+    }))
 
 //注册图标
 const renderIcon = (icon: Component) => {
-  return () => h(NIcon, null, { default: () => h(icon) })
+  return () => h(NIcon, null, {default: () => h(icon)})
 }
 
 //发送消息 
@@ -193,7 +245,7 @@ const optionInit = async () => {
   //获取所有游戏社区
   let communityResult: any = await listCommunity()
   selectOption.value.community = communityResult.rows.map((item: any) => {
-    let { id, name } = item
+    let {id, name} = item
     return {
       value: id,
       label: name
@@ -211,6 +263,13 @@ const optionInit = async () => {
   if (localStorage.getItem("mode")) {
     modeId.value = localStorage.getItem("mode")
   }
+
+  let lstLeave = await listLeaveTypeEnum();
+  lstLeaveType.value = Object.entries(lstLeave.data).map(([key, value]) => ({
+    value: key,
+    label: value
+  }));
+  lstLeaveType.value.unshift({label: "全部留言", value: 0})
 }
 
 //保存用户设置
@@ -245,7 +304,7 @@ const clearCache = () => {
 const openChart = () => {
   chartShow.value = true
   nextTick(() => {
-    virtualListInst.value?.scrollTo({ position: 'bottom' })
+    virtualListInst.value?.scrollTo({position: 'bottom'})
   })
 }
 
@@ -257,9 +316,9 @@ const openLeave = () => {
 //监听消息变化 
 watch(globalStore.chatHistory, (newValue: any, oldValue: any) => {
   nextTick(() => {
-    virtualListInst.value?.scrollTo({ position: 'bottom' })
+    virtualListInst.value?.scrollTo({position: 'bottom'})
   })
-}, { deep: true })
+}, {deep: true})
 onMounted(() => {
   optionInit()
 })
@@ -341,4 +400,20 @@ onMounted(() => {
 .setup:hover .setView {
   opacity: 1;
 }
+
+.drawer-header-leave-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+
+  .leave-header {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
 </style>
