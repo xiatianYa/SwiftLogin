@@ -112,17 +112,17 @@
       <n-drawer-content body-content-class="content">
         <template #header>
           <div class="drawer-header-leave-title">
-            <div class="ml-20 leave-header">
+            <div class="leave-header">
               <div class="chose-type">
                 <n-radio-group v-model:value="curLeave">
                   <n-space>
-                    <n-radio-button v-for="item in lstLeaveType" :key="item.value" :value="item.value" style="padding: 8px;">
+                    <n-radio v-for="item in lstLeaveType" :key="item.value" :value="item.value" style="padding: 8px;">
                       {{ item.label }}
-                    </n-radio-button>
+                    </n-radio>
                   </n-space>
                 </n-radio-group>
               </div>
-              <n-button class="ml-100" type="primary">新增留言</n-button>
+              <n-button type="info" class="ml-30">新增留言</n-button>
             </div>
           </div>
         </template>
@@ -158,11 +158,11 @@ import {
   NTooltip,
   NAvatar,
   NRadioGroup,
-  NRadioButton,
+  NRadio,
   VirtualListInst
 } from 'naive-ui';
 import {SaveOutline, MailOutline} from '@vicons/ionicons5';
-import {CustomType, LeaveType} from '@/types';
+import {CustomType, Leave, LeaveType} from '@/types';
 import {listLeaveTypeEnum, listModeEnum} from '@/api/enum'
 import {listCommunity} from '@/api/community'
 
@@ -193,9 +193,14 @@ const modeId = ref<any>(null)
 //抽屉
 const setDialog = ref(false);
 
+// 留言类型集合
 let lstLeaveType = ref<LeaveType[]>([]);
 
+// 当前留言
 let curLeave = ref(0)
+
+// 留言集合
+let lstLeave = ref<Leave[]>([])
 
 //select配置项
 const selectOption = ref<CustomType>({
@@ -263,13 +268,14 @@ const optionInit = async () => {
   if (localStorage.getItem("mode")) {
     modeId.value = localStorage.getItem("mode")
   }
-
   let lstLeave = await listLeaveTypeEnum();
   lstLeaveType.value = Object.entries(lstLeave.data).map(([key, value]) => ({
     value: key,
     label: value
   }));
   lstLeaveType.value.unshift({label: "全部留言", value: 0})
+
+  GetLeave(curLeave)
 }
 
 //保存用户设置
@@ -323,7 +329,9 @@ onMounted(() => {
   optionInit()
 })
 
+const GetLeave = (leaveType) => {
 
+}
 </script>
 <style lang="scss" scoped>
 .drawer-header-title {
