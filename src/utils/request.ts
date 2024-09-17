@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getToken } from "@/utils/auth";
 axios.defaults.headers["Content-Type"] = "application/json;charset=utf-8";
+import useStore from "@/store";
 // 创建axios实例
 const service = axios.create({
   baseURL: "/api",
@@ -25,6 +26,12 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (res) => {
+    //全局仓库
+    let { userStore } = useStore();
+    if (res.data.code == 401) {
+      //清除本地缓存
+      userStore.logOut();
+    }
     return res.data;
   },
   (error) => {

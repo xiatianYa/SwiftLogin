@@ -9,6 +9,9 @@
         <svg class="icon pointer" aria-hidden="true" @click="openChart()" v-show="userStore.id">
           <use xlink:href="#icon-xiaoxi"></use>
         </svg>
+        <svg class="icon pointer" aria-hidden="true" @click="openLeave()">
+          <use xlink:href="#icon-shu1"></use>
+        </svg>
       </div>
     </transition>
     <!-- 系统设置 -->
@@ -109,8 +112,8 @@
 import useStore from "@/store";
 import chatEnum from "@/utils/chatEnum";
 import { ref, onMounted, Component, h, nextTick, watch } from 'vue'
-import { NSelect, NInput, NEllipsis, NScrollbar, NDrawer, NDrawerContent, NCard, NSpace, useMessage, NButton, NIcon, NSwitch, NAvatarGroup, NTooltip, NAvatar, NVirtualList, VirtualListInst } from 'naive-ui';
-import { SaveOutline } from '@vicons/ionicons5';
+import { NSelect, NInput, NEllipsis, NScrollbar, NDrawer, NDrawerContent, NCard, NSpace, useMessage, NButton, NIcon, NSwitch, NAvatarGroup, NTooltip, NAvatar, VirtualListInst } from 'naive-ui';
+import { SaveOutline, MailOutline } from '@vicons/ionicons5';
 import { CustomType } from '@/types';
 import { listModeEnum } from '@/api/enum'
 import { listCommunity } from '@/api/community'
@@ -120,6 +123,9 @@ let { globalStore, userStore } = useStore();
 
 //聊天室是否显示
 const chartShow = ref(false)
+
+//活动留言框
+const leaveShow = ref(false);
 
 //Dom
 const virtualListInst = ref<VirtualListInst>()
@@ -241,6 +247,11 @@ const openChart = () => {
   nextTick(() => {
     virtualListInst.value?.scrollTo({ position: 'bottom' })
   })
+}
+
+//打开活动留言
+const openLeave = () => {
+  leaveShow.value = true;
 }
 
 //监听消息变化 

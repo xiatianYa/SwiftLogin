@@ -59,6 +59,11 @@ const router = createRouter({
           name: "live",
           component: () => import("@/view/live/index.vue"),
         },
+        {
+          path: "community",
+          name: "communityMenu",
+          component: () => import("@/view/community/index.vue"),
+        },
       ],
     },
     //未知路由 全部前往404页面

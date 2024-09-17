@@ -216,71 +216,21 @@ const menuOptions: MenuOption[] = [
         icon: renderIcon(VideocamIcon)
     },
     {
-        label: '社区导航',
+        label: () =>
+            h(
+                RouterLink,
+                {
+                    to: {
+                        name: 'communityMenu',
+                        params: {
+                            lang: 'zh-CN'
+                        }
+                    }
+                },
+                { default: () => '社区导航' }
+            ),
         key: 'community_menu',
         icon: renderIcon(MenuIcon),
-        children: [
-            {
-                label: () =>
-                    h(
-                        'a',
-                        {
-                            href: 'https://darkrp.cn/',
-                            target: '_blank',
-                        },
-                        'EXG社区'
-                    ),
-                key: 'exg',
-            },
-            {
-                label: () =>
-                    h(
-                        'a',
-                        {
-                            href: 'https://csgo.moeub.cn',
-                            target: '_blank',
-                        },
-                        'UB社区'
-                    ),
-                key: 'ub',
-            },
-            {
-                label: () =>
-                    h(
-                        'a',
-                        {
-                            href: 'https://zombieden.cn/',
-                            target: '_blank',
-                        },
-                        'ZED社区'
-                    ),
-                key: 'zed',
-            },
-            {
-                label: () =>
-                    h(
-                        'a',
-                        {
-                            href: 'https://fyscs.com/',
-                            target: '_blank',
-                        },
-                        'FYS社区'
-                    ),
-                key: 'fys',
-            },
-            {
-                label: () =>
-                    h(
-                        'a',
-                        {
-                            href: 'https://servers.upkk.com',
-                            target: '_blank',
-                        },
-                        '93X社区'
-                    ),
-                key: '93x',
-            },
-        ]
     },
     {
         label: () =>

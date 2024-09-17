@@ -51,7 +51,7 @@ import reusePagination from '@/components/reusePagination/index.vue'
 import { ref, h, Component, onMounted } from 'vue';
 import { listModeEnum, listTagEnum, listTypeEnum } from '@/api/enum'
 import { listMap } from '@/api/map'
-import { NSelect, NButton, NIcon, NInput, NTag, NImage,useNotification } from 'naive-ui';
+import { NSelect, NButton, NIcon, NInput, NTag, NImage,useNotification,NSpin} from 'naive-ui';
 import { Search, TrashOutline,CopyOutline } from '@vicons/ionicons5';
 import { CustomType } from '@/types';
 //消息弹出框
