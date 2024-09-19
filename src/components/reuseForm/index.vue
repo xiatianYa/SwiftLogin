@@ -25,7 +25,8 @@
                 <n-form-item v-if="item.type === 'date'" :label="item.label" :path="item.props">
                     <n-date-picker v-model:formatted-value="formData[item.props]" :value-format="item.formatData"
                         :type="item.dataType" :placeholder="item.placeholder || '请选择日期'"
-                        :is-date-disabled="item.isDataDisabled(formData[item.props])" clearable />
+                        :is-date-disabled="item.isDataDisabled ? item.isDataDisabled(formData[item.props]) : null"
+                        clearable />
                 </n-form-item>
                 <!-- 单选框 -->
                 <n-form-item v-if="item.type === 'redio'" :label="item.label" :path="item.props">

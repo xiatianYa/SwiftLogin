@@ -1,14 +1,19 @@
-import request from '@/utils/request'
+import request from "@/utils/request";
 
-export function listLeave(data) {
-    var parameter = "";
-    if (data != null) {
-        for (let name in data) {
-
-        }
-    }
-    return request({
-        url: "/blog/leave/list/v2",
-        method: "get",
-    });
+//查询留言列表
+export function listLeave(query?: any) {
+  return request({
+    url: "/blog/leave/list",
+    method: "get",
+    params: query,
+  });
 }
+
+//新增留言
+export function addLeave(query: any) {
+    return request({
+      url: "/blog/leave",
+      method: "post",
+      data: query,
+    });
+  }

@@ -19,13 +19,12 @@
       <n-drawer-content title="系统设置">
         <n-card :bordered="false">
           <n-space vertical>
-            <n-select class="mb-10" v-model:value="communityId" :options="selectOption.community"
-                      placeholder="请选择指定社区"
-                      clearable/>
+            <n-select class="mb-10" v-model:value="communityId" :options="selectOption.community" placeholder="请选择指定社区"
+              clearable />
             <n-select class="mb-10" v-model:value="modeId" :options="selectOption.mode" placeholder="请选择指定模式"
-                      clearable/>
+              clearable />
             <n-switch class="mb-10" size="large" v-model:value="globalStore.nightCycle" :on-update:value="handleCycle"
-                      :default-value="globalStore.nightCycle" :round="false">
+              :default-value="globalStore.nightCycle" :round="false">
               <template #checked-icon>
                 🌞
               </template>
@@ -36,11 +35,11 @@
           </n-space>
           <n-space>
             <n-button class="mr-10" strong secondary type="success" :render-icon="renderIcon(SaveOutline)"
-                      @click="saveSet">
+              @click="saveSet">
               保存设置
             </n-button>
             <n-button class="mr-10" strong secondary type="error" :render-icon="renderIcon(SaveOutline)"
-                      @click="clearCache">
+              @click="clearCache">
               清除缓存
             </n-button>
           </n-space>
@@ -51,7 +50,7 @@
     <n-drawer v-model:show="chartShow" :width="500" placement="left">
       <n-drawer-content body-content-class="content">
         <template #header>
-          <div class="drawer-header-title">
+          <div class="chat-header-title">
             <div>
               聊天室
             </div>
@@ -60,7 +59,7 @@
                 <template #avatar="{ option: { name, src } }">
                   <n-tooltip>
                     <template #trigger>
-                      <n-avatar :src="src"/>
+                      <n-avatar :src="src" />
                     </template>
                     {{ name }}
                   </n-tooltip>
@@ -75,20 +74,20 @@
           </div>
         </template>
         <template #default>
-          <div class="drawer-content-chat">
-            <n-scrollbar style="max-height: 600px" ref="virtualListInst">
+          <div class="chat-content-chat">
+            <n-scrollbar style="max-height: 100%" ref="virtualListInst">
               <div v-for="item, index in globalStore.chatHistory"
-                   :class="item.fromUserId == userStore.id ? 'itemTwo' : 'itemOne'">
-                <n-avatar round :size="32" :src="item.fromUserAvatar" class="avatar"/>
+                :class="item.fromUserId == userStore.id ? 'itemTwo' : 'itemOne'">
+                <n-avatar round :size="32" :src="item.fromUserAvatar" class="avatar" />
                 <div>
                   <n-ellipsis
-                      :style="item.fromUserId == userStore.id ? 'justify-content:flex-end;' : 'justify-content:flex-start;'"
-                      style="display: flex;width: 100%;" :line-clamp="1">
+                    :style="item.fromUserId == userStore.id ? 'justify-content:flex-end;' : 'justify-content:flex-start;'"
+                    style="display: flex;width: 100%;" :line-clamp="1">
                     {{ item.fromUserNickName }}
                   </n-ellipsis>
                   <n-ellipsis
-                      :style="globalStore.nightCycle ? 'background-color: black;color: #fff;' : 'background-color: #fff;color: black;'"
-                      style="border-radius: 7px;" :line-clamp="2" class="p-5">
+                    :style="globalStore.nightCycle ? 'background-color: black;color: #fff;' : 'background-color: #fff;color: black;'"
+                    style="border-radius: 7px;" :line-clamp="2" class="p-5">
                     {{ item.data }}
                   </n-ellipsis>
                 </div>
@@ -97,9 +96,9 @@
           </div>
         </template>
         <template #footer>
-          <div class="drawer-footer-bottom">
+          <div class="chat-footer-bottom">
             <n-input v-model:value="inputMsg" style="width: 300px;" round placeholder="请输入聊天内容" clearable
-                     @keydown.enter="sendMsgAll()"/>
+              @keydown.enter="sendMsgAll()" />
             <n-button round @click="sendMsgAll()">
               发送
             </n-button>
@@ -111,36 +110,92 @@
     <n-drawer v-model:show="leaveShow" :width="500" placement="left">
       <n-drawer-content body-content-class="content">
         <template #header>
-          <div class="drawer-header-leave-title">
-            <div class="leave-header">
-              <div class="chose-type">
-                <n-radio-group v-model:value="curLeave">
-                  <n-space>
-                    <n-radio v-for="item in lstLeaveType" :key="item.value" :value="item.value" style="padding: 8px;">
-                      {{ item.label }}
-                    </n-radio>
-                  </n-space>
-                </n-radio-group>
-              </div>
-              <n-button type="info" class="ml-30">新增留言</n-button>
+          <div class="leave-header-title">
+            <div>
+              留言版
             </div>
+            <n-button-group size="small" class="ml-30">
+              <n-button type="default" round @click="searchLeave(1)">
+                <template #icon>
+                  <n-icon>
+                    <ChatboxEllipsesOutline />
+                  </n-icon>
+                </template>
+                闲聊
+              </n-button>
+              <n-button type="default" @click="searchLeave(2)">
+                <template #icon>
+                  <n-icon>
+                    <ChatboxEllipsesOutline />
+                  </n-icon>
+                </template>
+                问题
+              </n-button>
+              <n-button type="default" round @click="searchLeave(3)">
+                <template #icon>
+                  <n-icon>
+                    <GameControllerOutline />
+                  </n-icon>
+                </template>
+                活动
+              </n-button>
+            </n-button-group>
           </div>
         </template>
         <template #default>
-          <div class="drawer-content-chat">
-            <n-scrollbar style="max-height: 600px" ref="virtualListInst">
-
+          <div class="leave-content-chat">
+            <n-scrollbar style="max-height: 100%" ref="virtualListInst">
+              <div class="leave-box">
+                <div class="leave mb-15" v-for="leave, index in leaveListData" :key="index">
+                  <div class="leave-left">
+                    <n-avatar round size="medium" :src="leave.userAvatar" />
+                  </div>
+                  <div class="leave-right">
+                    <div class="ml-10" style="color: #FB7299;">{{ leave.nickName }}</div>
+                    <div class="ml-10 mt-5">{{ leave.leaveMessage }}</div>
+                    <div class="ml-10">
+                      <n-image v-for="image in leave.leaveImages" width="120" height="120" :src="image" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </n-scrollbar>
           </div>
         </template>
+        <template #footer>
+          <n-button round @click="openAddLeave()" v-show="userStore.id">
+            添加留言
+          </n-button>
+        </template>
       </n-drawer-content>
     </n-drawer>
+    <!-- 新增留言框 -->
+    <n-modal v-model:show="addLeaveShow" transform-origin="center">
+      <resuse-form ref="formRef" class="formClass" :formData="addLeaveData" :formOption="leaveOption"
+        :formItemOption="selectOption" :rules="rules" labelPosition="right" labelWidth="140">
+        <template #ImgUpload>
+          <ImgUpload v-model="addLeaveData.leaveImages" :max="3"></ImgUpload>
+        </template>
+        <template #Footer>
+          <n-space>
+            <n-button secondary round @click="addLeaveShow = false">
+              取消
+            </n-button>
+            <n-button type="info" secondary round @click="addLeaveSubmit">
+              提交
+            </n-button>
+          </n-space>
+        </template>
+      </resuse-form>
+    </n-modal>
   </div>
 </template>
 <script setup lang="ts">
 import useStore from "@/store";
 import chatEnum from "@/utils/chatEnum";
-import {ref, onMounted, Component, h, nextTick, watch} from 'vue'
+import resuseForm from '@/components/reuseForm/index.vue';
+import ImgUpload from '@/components/imgUpload/index.vue'
+import { ref, onMounted, Component, h, nextTick, watch, reactive } from 'vue';
 import {
   NSelect,
   NInput,
@@ -157,26 +212,34 @@ import {
   NAvatarGroup,
   NTooltip,
   NAvatar,
-  NRadioGroup,
-  NRadio,
-  VirtualListInst
+  NButtonGroup,
+  VirtualListInst,
+  NModal,
+  NImage
 } from 'naive-ui';
-import {SaveOutline, MailOutline} from '@vicons/ionicons5';
-import {CustomType, Leave, LeaveType} from '@/types';
-import {listLeaveTypeEnum, listModeEnum} from '@/api/enum'
-import {listCommunity} from '@/api/community'
+import { SaveOutline, ChatboxEllipsesOutline, GameControllerOutline } from '@vicons/ionicons5';
+import { CustomType } from '@/types';
+import { listLeaveTypeEnum, listModeEnum } from '@/api/enum';
+import { listCommunity } from '@/api/community';
+import { listLeave, addLeave } from '@/api/leave';
 
 //全局仓库
-let {globalStore, userStore} = useStore();
+let { globalStore, userStore } = useStore();
 
 //聊天室是否显示
-const chartShow = ref(false)
+const chartShow = ref(false);
 
 //活动留言框
 const leaveShow = ref(false);
 
+//添加留言表单
+const addLeaveShow = ref(false);
+
+//表单
+const formRef = ref();
+
 //Dom
-const virtualListInst = ref<VirtualListInst>()
+const virtualListInst = ref<VirtualListInst>();
 
 //消息对象
 const message = useMessage();
@@ -193,21 +256,61 @@ const modeId = ref<any>(null)
 //抽屉
 const setDialog = ref(false);
 
-// 留言类型集合
-let lstLeaveType = ref<LeaveType[]>([]);
+// 查询参数
+const queryParams = ref<any>({
+  pageNum: 1,
+  pageSize: 999,
+  leaveType: null
+})
 
-// 当前留言
-let curLeave = ref(0)
+//主播入驻表达数据
+const addLeaveData = ref<any>({
+  leaveType: null,
+  leaveMessage: null,
+  leaveImages: null,
+});
 
-// 留言集合
-let lstLeave = ref<Leave[]>([])
+//留言数据列表
+const leaveListData = ref<any>({})
+
+//留言表单配置项
+const leaveOption = reactive([
+  {
+    type: "select", selectProps: "leaveType", props: "leaveType", label: "留言类型", placeholder: "请选择留言类型"
+  },
+  {
+    type: "input", inputType: "textarea", props: "leaveMessage", label: "留言消息", placeholder: "请输入留言消息", maxlength: 255
+  },
+  {
+    type: "slot", slotName: "ImgUpload", props: "leaveImages", label: "留言图片"
+  },
+  {
+    type: "slot", slotName: "Footer"
+  }
+]);
+
+//数据校验
+const rules = ref({
+  leaveType: {
+    required: true,
+    trigger: ['blur', '留言类型'],
+    message: '请输入留言类型'
+  },
+  leaveMessage: {
+    required: true,
+    trigger: ['blur', '留言消息'],
+    message: '请输入留言消息'
+  }
+})
 
 //select配置项
 const selectOption = ref<CustomType>({
   //社区列表
   community: [],
   //模式列表
-  mode: []
+  mode: [],
+  //留言类型列表
+  leaveType: []
 })
 
 //控制白天模式 / 黑夜模式 
@@ -217,14 +320,14 @@ const handleCycle = (value: boolean) => {
 
 //创建头像群组
 const createDropdownOptions = (options: Array<{ name: string, src: string }>) =>
-    options.map(option => ({
-      key: option.name,
-      label: option.name
-    }))
+  options.map(option => ({
+    key: option.name,
+    label: option.name
+  }))
 
 //注册图标
 const renderIcon = (icon: Component) => {
-  return () => h(NIcon, null, {default: () => h(icon)})
+  return () => h(NIcon, null, { default: () => h(icon) })
 }
 
 //发送消息 
@@ -245,12 +348,38 @@ const sendMsgAll = () => {
   inputMsg.value = "";
 }
 
+//打开发送留言
+const openAddLeave = () => {
+  addLeaveData.value = {
+    leaveType: null,
+    leaveMessage: null,
+    leaveImages: null,
+  }
+  addLeaveShow.value = true;
+}
+
+//新增留言
+const addLeaveSubmit = async () => {
+  formRef.value?.ruleFormRef().validate(async (errors: any) => {
+    if (!errors) {
+      let addLeaveResult: any = await addLeave(addLeaveData.value);
+      if (addLeaveResult.code == 200) {
+        message.success("留言成功")
+        init();
+      } else {
+        message.error(addLeaveResult.msg)
+      }
+      addLeaveShow.value = false;
+    }
+  })
+}
+
 //配置项初始化
 const optionInit = async () => {
   //获取所有游戏社区
   let communityResult: any = await listCommunity()
   selectOption.value.community = communityResult.rows.map((item: any) => {
-    let {id, name} = item
+    let { id, name } = item
     return {
       value: id,
       label: name
@@ -268,14 +397,12 @@ const optionInit = async () => {
   if (localStorage.getItem("mode")) {
     modeId.value = localStorage.getItem("mode")
   }
-  let lstLeave = await listLeaveTypeEnum();
-  lstLeaveType.value = Object.entries(lstLeave.data).map(([key, value]) => ({
+  //获取所有留言类型
+  let leaveTypeResult: any = await listLeaveTypeEnum();
+  selectOption.value.leaveType = Object.entries(leaveTypeResult.data).map(([key, value]) => ({
     value: key,
     label: value
   }));
-  lstLeaveType.value.unshift({label: "全部留言", value: 0})
-
-  GetLeave(curLeave)
 }
 
 //保存用户设置
@@ -310,7 +437,7 @@ const clearCache = () => {
 const openChart = () => {
   chartShow.value = true
   nextTick(() => {
-    virtualListInst.value?.scrollTo({position: 'bottom'})
+    virtualListInst.value?.scrollTo({ position: 'bottom' })
   })
 }
 
@@ -319,28 +446,50 @@ const openLeave = () => {
   leaveShow.value = true;
 }
 
+//切换留言类型的函数
+const searchLeave = (leaveType: number) => {
+  queryParams.value.leaveType = leaveType;
+  init();
+}
+
+//初始化消息
+const init = async () => {
+  let leaveListResult = await listLeave(queryParams.value);
+  leaveListData.value = leaveListResult.data.map((item: any) => {
+    let { leaveImages } = item;
+    return {
+      ...item,
+      leaveImages: leaveImages.split(",")
+    }
+  });
+  console.log(leaveListData.value);
+}
+
 //监听消息变化 
 watch(globalStore.chatHistory, (newValue: any, oldValue: any) => {
   nextTick(() => {
-    virtualListInst.value?.scrollTo({position: 'bottom'})
+    virtualListInst.value?.scrollTo({ position: 'bottom' })
   })
-}, {deep: true})
+}, { deep: true })
 onMounted(() => {
   optionInit()
+  init();
 })
-
-const GetLeave = (leaveType) => {
-
-}
 </script>
 <style lang="scss" scoped>
-.drawer-header-title {
+.chat-header-title {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.drawer-content-chat {
+.leave-header-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chat-content-chat {
   width: 100%;
   height: 100%;
   padding: 10px 15px;
@@ -365,7 +514,32 @@ const GetLeave = (leaveType) => {
   }
 }
 
-.drawer-footer-bottom {
+.leave-content-chat {
+  width: 100%;
+  height: 100%;
+  padding: 10px 20px;
+
+  .leave-box {
+    .leave {
+      display: flex;
+
+      .leave-left {}
+
+      .leave-right {
+        font-size: 13px;
+        font-weight: 500;
+        color: black;
+
+        div {
+          width: 100%;
+          display: flex;
+        }
+      }
+    }
+  }
+}
+
+.chat-footer-bottom {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -408,20 +582,4 @@ const GetLeave = (leaveType) => {
 .setup:hover .setView {
   opacity: 1;
 }
-
-.drawer-header-leave-title {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-
-  .leave-header {
-    flex: 1;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-
 </style>
