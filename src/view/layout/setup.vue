@@ -459,10 +459,9 @@ const init = async () => {
     let { leaveImages } = item;
     return {
       ...item,
-      leaveImages: leaveImages.split(",")
+      leaveImages: leaveImages ? leaveImages.split(",") : null
     }
   });
-  console.log(leaveListData.value);
 }
 
 //监听消息变化 

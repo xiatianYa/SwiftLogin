@@ -1,4 +1,4 @@
-let wsUrl = "wss://bluearchive.top:9207/server/";
+let wsUrl = "wss://bluearchive.top/websocket/server/";
 import useStore from "@/store";
 import chatEnum from "@/utils/chatEnum";
 import { createDiscreteApi } from "naive-ui";
@@ -118,7 +118,9 @@ const Websocket: any = {
       }
     };
     //连接发生错误
-    Websocket.websocket.onerror = function () {};
+    Websocket.websocket.onerror = function () {
+      console.log("连接错误");
+    };
     //连接成功
     Websocket.websocket.onopen = function () {};
   },
@@ -128,6 +130,7 @@ const Websocket: any = {
   },
   // 断开连接
   close: (isReonnect: boolean) => {
+    console.log("连接断开");
     //如果传递是false 则不重新连接
     if (!isReonnect) {
       //清空定时任务

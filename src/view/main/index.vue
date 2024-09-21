@@ -29,7 +29,7 @@
                     <n-timeline-item type="success" content="新增直播推荐(大主播入驻请加反馈群),修复自动挤服Bug(特性) v0.1.3"
                         time="2024-09-12" />
                     <n-timeline-item type="success" content="新增各社区导航,优化地图列表功能 v0.1.4" time="2024-09-14" />
-                    <n-timeline-item content="新增留言版" time="待定" line-type="dashed" />
+                    <n-timeline-item type="success" content="新增留言版" time="2024-09-19" />
                     <n-timeline-item content="新增登录器软件,无需浏览器版本" time="待定" line-type="dashed" />
                 </n-timeline>
             </n-card>
@@ -61,9 +61,7 @@
                 </n-space>
                 <n-space>
                     <n-image width="100%" height="200"
-                        src="https://bluearchive.top:9500/statics/2024/09/13/zanshangma.png" />
-                    <n-image width="100%" height="200"
-                        src="https://bluearchive.top:9500/statics/2024/09/13/taofanma.png" />
+                        src="https://bluearchive.top/statics/2024/09/13/zanshangma.png" />
                 </n-space>
             </n-card>
         </div>
