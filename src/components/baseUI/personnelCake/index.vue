@@ -41,7 +41,10 @@ let option = ref<any>(
                 },
                 label: {
                     show: false,
-                    position: 'center'
+                    position: 'center',
+                    formatter: function (params: any) {
+                        return params.name + '(' + params.value + ")";
+                    }
                 },
                 emphasis: {
                     label: {

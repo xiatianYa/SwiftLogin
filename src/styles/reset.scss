@@ -132,6 +132,15 @@ body {
   padding: 0 !important;
 }
 
+/**默认字体*/
+@font-face {
+  font-family: "阿里妈妈方圆体 VF Regular";
+  font-weight: 700;
+  src: url("../assets/fonts/AlimamaFangYuanTiVF-Thin.woff2") format("woff2"),
+    url("../assets/fonts/AlimamaFangYuanTiVF-Thin.woff") format("woff");
+  font-display: swap;
+}
+
 *::before,
 *::after {
   box-sizing: border-box;
@@ -171,8 +180,7 @@ a:active {
 body,
 html {
   font-size: 14px;
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  font-family: "阿里妈妈方圆体 VF Regular", sans-serif;
 }
 
 body {

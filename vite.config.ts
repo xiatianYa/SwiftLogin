@@ -8,13 +8,8 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     proxy: {
-      "/api/websocket": {
-        target: "https://www.bluearchive.top:9207",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/\/api\/websocket($|\/)/, ""), // 路径重写，将 '/api' 前缀去掉
-      },
       "/api": {
-        target: "https://www.bluearchive.top:8080",
+        target: "https://www.bluearchive.top",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""), // 路径重写，将 '/api' 前缀去掉
       },
