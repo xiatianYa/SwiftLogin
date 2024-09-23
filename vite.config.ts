@@ -9,7 +9,7 @@ export default defineConfig({
     host: "0.0.0.0",
     proxy: {
       "/api": {
-        target: "https://www.bluearchive.top",
+        target: "https://www.bluearchive.top/",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""), // 路径重写，将 '/api' 前缀去掉
       },

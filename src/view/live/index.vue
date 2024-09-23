@@ -13,7 +13,7 @@
         <!-- 主体 -->
         <n-spin :show="loading" :size="'large'" style="min-height: 50vh;">
             <div class="lives">
-                <n-card class="live mb-10" content-style="padding: 0;" v-for="live in liveData"
+                <n-card class="live mb-10" content-style="padding: 0;" v-for="live, index in liveData" :key="index"
                     @click="goHref(live.liveUrl)">
                     <div class="image-container" @mouseover="showStatusId = live.roomId"
                         @mouseleave="showStatusId = null">

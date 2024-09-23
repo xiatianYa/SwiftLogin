@@ -5,12 +5,12 @@
                 <personnelEcharts :chartData="personnelData"></personnelEcharts>
             </n-card>
             <n-card class="timeline mb-10">
-                <n-space>
+                <n-space class="mb-10">
                     <span style="font-size: 16px;font-weight: bold;">
                         项目动态
                     </span>
                 </n-space>
-                <n-timeline class="mt-10">
+                <n-timeline class="mb-10">
                     <n-timeline-item type="success" content="新增地图订阅 新增亮度模式切换 v0.0.1" time="2024-08-11" />
                     <n-timeline-item type="success" content="新增全局设置 修改配置项搜索服务器 v0.0.2" time="2024-08-12" />
                     <n-timeline-item type="success" content="新增绑键助手 v0.0.3" time="2024-08-12" />
@@ -29,8 +29,8 @@
                     <n-timeline-item type="success" content="新增直播推荐(大主播入驻请加反馈群),修复自动挤服Bug(特性) v0.1.3"
                         time="2024-09-12" />
                     <n-timeline-item type="success" content="新增各社区导航,优化地图列表功能 v0.1.4" time="2024-09-14" />
-                    <n-timeline-item type="success" content="新增留言版" time="2024-09-19" />
-                    <n-timeline-item content="新增登录器软件,无需浏览器版本" time="待定" line-type="dashed" />
+                    <n-timeline-item type="success" content="新增留言版 v0.1.5" time="2024-09-19" />
+                    <n-timeline-item type="success" content="新增登录器软件,无需浏览器版本 v0.1.6" time="2024-09-22" />
                 </n-timeline>
             </n-card>
         </div>
@@ -38,14 +38,15 @@
             <n-card class="echarts mb-10">
                 <personnelCake :chartData="personnelCakeData"></personnelCake>
             </n-card>
-            <n-card class="echarts mb-10">
+            <n-card class="mb-10">
                 <n-space>
                     <span style="font-size: 16px;font-weight: bold;">
                         在线用户
                     </span>
                 </n-space>
                 <n-space>
-                    <n-tooltip placement="top-start" trigger="hover" v-for="user in globalStore.onlineUserList">
+                    <n-tooltip placement="top-start" trigger="hover" v-for="user, index in globalStore.onlineUserList"
+                        :key="index">
                         <template #trigger>
                             <n-avatar class="mr-5 mt-5" round size="medium" :src="user.src" />
                         </template>
@@ -53,7 +54,7 @@
                     </n-tooltip>
                 </n-space>
             </n-card>
-            <n-card class="echarts mb-10">
+            <n-card class="sponsor mb-10">
                 <n-space>
                     <span style="font-size: 16px;font-weight: bold;">
                         赞赏码
@@ -151,14 +152,15 @@ onMounted(() => {
 .mainPage {
     display: flex;
     width: 100%;
-    height: 100%;
+    height: auto;
 
     .main-left {
         width: 50%;
+        height: 100%;
 
         .echarts {
             width: 100%;
-            height: 50%;
+            height: 400px;
             border-radius: 5px;
         }
 
@@ -170,11 +172,17 @@ onMounted(() => {
 
     .main-right {
         width: 50%;
+        height: 100%;
 
         .echarts {
             width: 100%;
-            height: 50%;
+            height: 400px;
             border-radius: 5px;
+        }
+
+        .sponsor {
+            width: 100%;
+            min-height: 250px;
         }
     }
 }

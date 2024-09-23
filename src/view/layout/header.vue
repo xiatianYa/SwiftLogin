@@ -275,7 +275,7 @@ const qqLogin = () => {
     //调用第三方登录框
     QC.Login.showPopup({
         appId: "102129326",// 填写在QQ互联上申请的AppId
-        redirectURI: "http://www.bluearchive.top/main", //填写回调地址 登录成功后会自动跳往该地址
+        redirectURI: "https://www.bluearchive.top/main", //填写回调地址 登录成功后会自动跳往该地址
     });
 }
 //检测第三方登录

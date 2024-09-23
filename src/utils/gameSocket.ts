@@ -100,6 +100,7 @@ const Websocket: any = {
     };
     //连接断开时触发
     Websocket.websocket.onclose = (e: any) => {
+      console.log("连接断开");
       // 需要重新连接
       if (Websocket.is_reonnect && !Websocket.reconnect_timer) {
         Websocket.reconnect_timer = setInterval(async () => {
@@ -126,7 +127,9 @@ const Websocket: any = {
       console.log("连接错误");
     };
     //连接成功
-    Websocket.websocket.onopen = function () {};
+    Websocket.websocket.onopen = function () {
+      console.log("连接成功");
+    };
   },
   // 发送数据 全体消息
   sendMessage: (data: any) => {
@@ -134,7 +137,6 @@ const Websocket: any = {
   },
   // 断开连接
   close: (isReonnect: boolean) => {
-    console.log("连接断开");
     //如果传递是false 则不重新连接
     if (!isReonnect) {
       //清空定时任务

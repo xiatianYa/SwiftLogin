@@ -18,11 +18,11 @@ let { globalStore, userStore } = useStore()
 const { notification } = createDiscreteApi(["notification"]);
 onMounted(() => {
     //通知
-    // notification["warning"]({
-    //     content: "更新通知",
-    //     meta: "网页版本登录器将于2024/9/07 14:00 -> 未知,将新增首页模块,问题反馈可加反馈群901243791,欢迎大家提供意见。",
-    //     keepAliveOnHover: true,
-    // });
+    notification["info"]({
+        content: "更新通知",
+        meta: "登录器软件版已发布,请申请QQ群:901243791进行下载。",
+        keepAliveOnHover: true,
+    });
     globalStore.initGameSocket()
 })
 </script>

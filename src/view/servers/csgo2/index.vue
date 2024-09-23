@@ -58,7 +58,8 @@
                     </n-space>
                     <n-space class="mb-10" vertical>
                         <n-input-number class="mb-5" v-model:value="globalStore.automaticInfo.minPlayers"
-                            :disabled="globalStore.isAutomatic" placeholder="最小玩家数 (小于或于时自动进入服务器)" :min="0" :max="globalStore.automaticInfo.maxPlayers" clearable>
+                            :disabled="globalStore.isAutomatic" placeholder="最小玩家数 (小于或于时自动进入服务器)" :min="0"
+                            :max="globalStore.automaticInfo.maxPlayers" clearable>
                             <template #minus-icon>
                                 <n-icon :component="ArrowDownCircleOutline" />
                             </template>
@@ -122,7 +123,7 @@
                     <n-space>
                         <n-scrollbar style="max-height: 450px">
                             <div class="d_flex mt-10" v-if="globalStore.autoMapListInfo"
-                                v-for="mapInfo in globalStore.autoMapListInfo">
+                                v-for="mapInfo, index in globalStore.autoMapListInfo" :key="index">
                                 <n-image width="200" height="100%" class="mr-5" :src="mapInfo.mapUrl"
                                     v-if="mapInfo.mapUrl" />
                                 <div>
@@ -136,7 +137,8 @@
                                         <n-tag :color="renderColor(mapInfo.typeName)" size="small" class="mr-5">{{
                                             mapInfo.typeName }}</n-tag>
                                         <n-tag size="small" type="success" class="mr-5"
-                                            v-for="item in mapInfo?.tagName?.split(',').filter((item: any) => item != null && item != '')">{{
+                                            v-for="item, index in mapInfo?.tagName?.split(',').filter((item: any) => item != null && item != '')"
+                                            :key="index">{{
                                                 item }}</n-tag>
                                     </div>
                                     <div class="mt-5">
@@ -197,6 +199,7 @@ import { getServerInfo } from '@/api/steamApi'
 import { CustomType } from "@/types";
 import type { Component } from 'vue'
 import { ref, h, onMounted, watch } from 'vue';
+import { throttle } from 'lodash'
 import { NSelect, NButton, NIcon, NImage, NScrollbar, NSpin, NProgress, useNotification, NDrawer, NDrawerContent, NCard, NSpace, NSwitch, NInputNumber, NStatistic, NNumberAnimation, NPopover, useMessage, NTag, SelectOption } from 'naive-ui';
 import { Search, AlarmOutline, MapOutline, CopyOutline, EnterOutline, ArrowDownCircleOutline, ArrowUpCircleOutline, CaretForwardCircleOutline, CaretBackCircleOutline, InformationCircleOutline } from '@vicons/ionicons5';
 import { RowData } from 'naive-ui/es/data-table/src/interface';
@@ -480,6 +483,8 @@ const handleAutomaticMap = (value: boolean) => {
 
 //抽屉关闭的回调函数
 const handleDrawerClose = () => {
+    //清空订阅数据
+    mapInfo.value = {}
     //清空 关闭 各种定时任务 数据
     globalStore.initGlobal();
 }
@@ -489,23 +494,28 @@ const handleUpdateMapValue = (_value: string, option: SelectOption) => {
     mapInfo.value = JSON.parse(JSON.stringify(option));
 }
 
-//添加地图订阅
-const appendMap = () => {
-    if (Object.keys(mapInfo.value).length === 0 &&
-        Object.getOwnPropertyNames(mapInfo.value).length === 0) {
-        message.warning("请先选择订阅地图!");
-        return;
-    }
-    for (const map of globalStore.autoMapListInfo) {
-        if (map.label === mapInfo.value.label) {
-            message.warning("你已添加过此地图,请勿重复添加!");
+//添加地图订阅 节流
+const appendMap = throttle(() => {
+    const appendMap = () => {
+        if (Object.keys(globalStore.autoMapListInfo).length === 0 &&
+            Object.getOwnPropertyNames(globalStore.autoMapListInfo).length === 0) {
+            message.warning("请先选择订阅地图!");
             return;
         }
+        for (const map of globalStore.autoMapListInfo) {
+            if (map.label === mapInfo.value.label) {
+                message.warning("你已添加过此地图,请勿重复添加!");
+                return;
+            }
+        }
+        globalStore.autoMapListInfo.push(mapInfo.value);
+        //清空订阅对象
+        localStorage.removeItem("autoMap");
+        localStorage.setItem("autoMap", JSON.stringify(globalStore.autoMapListInfo));
+        message.success("添加成功");
     }
-    globalStore.autoMapListInfo.push(mapInfo.value);
-    localStorage.removeItem("autoMap");
-    localStorage.setItem("autoMap", JSON.stringify(globalStore.autoMapListInfo));
-}
+    appendMap();
+}, 500)
 
 //删除地图订阅
 const removeMap = (value: string) => {

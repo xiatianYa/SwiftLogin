@@ -76,7 +76,7 @@
         <template #default>
           <div class="chat-content-chat">
             <n-scrollbar style="max-height: 100%" ref="virtualListInst">
-              <div v-for="item, index in globalStore.chatHistory"
+              <div v-for="item, index in globalStore.chatHistory" :key="index"
                 :class="item.fromUserId == userStore.id ? 'itemTwo' : 'itemOne'">
                 <n-avatar round :size="32" :src="item.fromUserAvatar" class="avatar" />
                 <div>
@@ -154,7 +154,7 @@
                     <div class="ml-10" style="color: #FB7299;">{{ leave.nickName }}</div>
                     <div class="ml-10 mt-5">{{ leave.leaveMessage }}</div>
                     <div class="ml-10">
-                      <n-image v-for="image in leave.leaveImages" width="120" height="120" :src="image" />
+                      <n-image v-for="image,index in leave.leaveImages" :key="index" width="120" height="120" :src="image" />
                     </div>
                   </div>
                 </div>

@@ -23,6 +23,10 @@ const createWindow = () => {
         win.hide();    // 隐藏主程序窗口
     });
 
+    win.on('click', (e) => {
+        win.show();    // 打开主程序窗口
+    });
+
     // 创建任务栏图标
     tray = new Tray(path.join(__dirname, 'icons', 'logo.ico'))
 
@@ -37,6 +41,11 @@ const createWindow = () => {
         }
     ])
     tray.setContextMenu(contextMenu)  // 设置图标的内容菜单
+    // 点击托盘图标，显示主窗口
+    tray.on("click", () => {
+        win.show();
+    })
+
 }
 
 // app模块准备完成，创建窗口

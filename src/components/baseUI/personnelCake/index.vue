@@ -14,6 +14,15 @@ type Props = {
 // 使用 defineProps 接收 props  
 const props = defineProps<Props>();
 
+//饼图轮播
+const timer = ref<any>(null);
+
+//当前轮播下标
+const currentIndex = ref(-1);
+
+//图表对象
+const myChart = ref()
+
 const charts = ref();
 
 let option = ref<any>(
@@ -50,7 +59,8 @@ let option = ref<any>(
                     label: {
                         show: true,
                         fontSize: 16,
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
+                        fontFamily: '阿里妈妈方圆体 VF Regular'
                     }
                 },
                 labelLine: {
@@ -67,6 +77,79 @@ let option = ref<any>(
         ]
     }
 );
+
+// 定时轮播
+const timingFn = () => {
+    timer.value = setInterval(function () {
+        var dataLength = option.value.series[0].data.length;
+        // 取消之前高亮的图形
+        myChart.value.dispatchAction({
+            type: 'downplay',
+            seriesIndex: 0,
+            dataIndex: currentIndex.value
+        });
+        // 取消之前的选择
+        myChart.value.dispatchAction({
+            type: 'unselect',
+            seriesIndex: 0,
+            dataIndex: currentIndex.value
+        });
+        currentIndex.value = (currentIndex.value + 1) % dataLength;
+        // 高亮当前图形
+        myChart.value.dispatchAction({
+            type: 'highlight',
+            seriesIndex: 0,
+            dataIndex: currentIndex.value
+        });
+        // 选择指定的数据
+        myChart.value.dispatchAction({
+            type: 'toggleSelect',
+            seriesIndex: 0,
+            dataIndex: currentIndex.value
+        });
+        // 显示 tooltip
+        myChart.value.dispatchAction({
+            type: 'showTip',
+            seriesIndex: 0,
+            dataIndex: currentIndex.value
+        });
+    }, 3000);
+}
+
+// echarts事件
+const echartsEvent = () => {
+    myChart.value.on('mouseover', (params: any) => {
+        clearInterval(timer.value);
+        // 取消之前高亮的图形
+        myChart.value.dispatchAction({
+            type: 'downplay',
+            seriesIndex: 0,
+            dataIndex: currentIndex.value
+        });
+        // 取消之前的选择
+        myChart.value.dispatchAction({
+            type: 'unselect',
+            seriesIndex: 0,
+            dataIndex: currentIndex.value
+        });
+        // 高亮当前图形
+        currentIndex.value = params.dataIndex
+        myChart.value.dispatchAction({
+            type: 'highlight',
+            seriesIndex: 0,
+            dataIndex: currentIndex.value
+        });
+        myChart.value.dispatchAction({
+            type: 'toggleSelect',
+            seriesIndex: 0,
+            dataIndex: currentIndex.value
+        });
+    });
+    myChart.value.on('mouseout', (params: any) => {
+        currentIndex.value = params.dataIndex
+        timingFn()
+    });
+}
 
 const initCharts = () => {
     charts.value.initCharts();
@@ -93,6 +176,9 @@ watch(props, () => {
 
 onMounted(() => {
     initCharts()
+    myChart.value = charts.value?.myChart;
+    timingFn()
+    echartsEvent()
     drawCharts()
 })
 </script>
