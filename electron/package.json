@@ -1,5 +1,5 @@
 {
-  "name": "electron",
+  "name": "xiatian",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
@@ -7,9 +7,28 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "builde":"electron-builder"
+    "builde": "electron-builder"
   },
-  "author": "",
+  "build": {
+    "appId": "top.bluearchive.www",
+    "win": {
+      "icon": "./icons/logo.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "author": "eric",
   "license": "ISC",
   "description": "",
   "devDependencies": {

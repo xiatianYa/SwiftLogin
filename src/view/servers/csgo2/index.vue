@@ -124,7 +124,7 @@
                         <n-scrollbar style="max-height: 450px">
                             <div class="d_flex mt-10" v-if="globalStore.autoMapListInfo"
                                 v-for="mapInfo, index in globalStore.autoMapListInfo" :key="index">
-                                <n-image width="200" height="100%" class="mr-5" :src="mapInfo.mapUrl"
+                                <n-image width="200" height="120" class="mr-5" :src="mapInfo.mapUrl"
                                     v-if="mapInfo.mapUrl" />
                                 <div>
                                     <div>
@@ -464,16 +464,12 @@ const handleAutomaticPersonnel = (value: boolean) => {
 
 //开启/关闭 自动订阅地图
 const handleAutomaticMap = (value: boolean) => {
-    if (Object.keys(mapInfo.value).length === 0 &&
-        Object.getOwnPropertyNames(mapInfo.value).length === 0 || !globalStore.autoMapListInfo.length) {
-        message.warning("请先选择订阅地图!");
-        return;
-    }
-    if (!globalStore.autoMapListInfo) {
-        message.warning('请选择订阅地图')
-        return;
-    }
     if (value) {
+        if (Object.keys(globalStore.autoMapListInfo).length === 0 &&
+            Object.getOwnPropertyNames(globalStore.autoMapListInfo).length === 0) {
+            message.warning("请先选择订阅地图!");
+            return;
+        }
         message.success("地图订阅已开启")
     } else {
         message.info("地图订阅已关闭")
@@ -497,8 +493,8 @@ const handleUpdateMapValue = (_value: string, option: SelectOption) => {
 //添加地图订阅 节流
 const appendMap = throttle(() => {
     const appendMap = () => {
-        if (Object.keys(globalStore.autoMapListInfo).length === 0 &&
-            Object.getOwnPropertyNames(globalStore.autoMapListInfo).length === 0) {
+        if (Object.keys(mapInfo.value).length === 0 &&
+            Object.getOwnPropertyNames(mapInfo.value).length === 0) {
             message.warning("请先选择订阅地图!");
             return;
         }

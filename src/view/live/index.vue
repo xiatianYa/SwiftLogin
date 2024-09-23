@@ -6,7 +6,7 @@
                 <div class="title">直播推荐</div>
                 <n-button class="ml-20" strong secondary type="success" size="small"
                     :render-icon="renderIcon(PersonAddOutline)" v-show="userStore.id">
-                    大主播入驻
+                    主播入驻
                 </n-button>
             </n-space>
         </div>
