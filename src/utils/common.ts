@@ -5,6 +5,11 @@ function stringToBoolean(str: any): boolean {
   } else if (typeof str === "string" && str.toLowerCase() === "false") {
     return false;
   }
+  //根据当前时间 判断是否在晚上凌晨 调整夜间模式
+  const currentHour: number = new Date().getHours();
+  if (currentHour >= 22 || currentHour <= 9) {
+    return false;
+  }
   return true;
 }
 //判断传入时间是否在三小时内

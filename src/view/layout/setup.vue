@@ -1,19 +1,23 @@
 <template>
   <div class="setup">
-    <svg class="icon pointer" aria-hidden="true" @click="setDialog = true">
-      <use xlink:href="#icon-shezhi"></use>
-    </svg>
     <!-- 菜单 -->
-    <transition name="fadenum">
-      <div class="setView mb-5">
-        <svg class="icon pointer" aria-hidden="true" @click="openChart()" v-show="userStore.id">
-          <use xlink:href="#icon-xiaoxi"></use>
-        </svg>
-        <svg class="icon pointer" aria-hidden="true" @click="openLeave()">
-          <use xlink:href="#icon-shu1"></use>
-        </svg>
-      </div>
-    </transition>
+    <n-float-button position="relative" class="mb-15" @click="openLeave()">
+      <n-icon>
+        <ClipboardOutline />
+      </n-icon>
+    </n-float-button>
+    <n-float-button position="relative" class="mb-15" @click="openChart()">
+      <n-badge :value="globalStore.unreadMessageCount" :offset="[6, -8]">
+        <n-icon>
+          <ChatboxEllipsesOutline />
+        </n-icon>
+      </n-badge>
+    </n-float-button>
+    <n-float-button position="relative" @click="setDialog = true">
+      <n-icon>
+        <CogOutline />
+      </n-icon>
+    </n-float-button>
     <!-- 系统设置 -->
     <n-drawer v-model:show="setDialog" :width="500" placement="right">
       <n-drawer-content title="系统设置">
@@ -42,12 +46,16 @@
               @click="clearCache">
               清除缓存
             </n-button>
+            <n-button class="mr-10" strong secondary type="info" :render-icon="renderIcon(SyncOutline)"
+              @click="refresh">
+              刷新页面
+            </n-button>
           </n-space>
         </n-card>
       </n-drawer-content>
     </n-drawer>
     <!-- 聊天框 -->
-    <n-drawer v-model:show="chartShow" :width="500" placement="left">
+    <n-drawer v-model:show="chartShow" :on-after-leave="closeChartDrawer" :width="500" placement="left">
       <n-drawer-content body-content-class="content">
         <template #header>
           <div class="chat-header-title">
@@ -153,8 +161,10 @@
                   <div class="leave-right">
                     <div class="ml-10" style="color: #FB7299;">{{ leave.nickName }}</div>
                     <div class="ml-10 mt-5">{{ leave.leaveMessage }}</div>
+                    <div class="ml-10 mt-5">{{ leave.createTime }}</div>
                     <div class="ml-10">
-                      <n-image v-for="image,index in leave.leaveImages" :key="index" width="120" height="120" :src="image" />
+                      <n-image v-for="image, index in leave.leaveImages" :key="index" width="120" height="120"
+                        :src="image" />
                     </div>
                   </div>
                 </div>
@@ -215,9 +225,11 @@ import {
   NButtonGroup,
   VirtualListInst,
   NModal,
-  NImage
+  NImage,
+  NFloatButton,
+  NBadge
 } from 'naive-ui';
-import { SaveOutline, ChatboxEllipsesOutline, GameControllerOutline } from '@vicons/ionicons5';
+import { SaveOutline, ChatboxEllipsesOutline, GameControllerOutline, SyncOutline, CogOutline, ClipboardOutline } from '@vicons/ionicons5';
 import { CustomType } from '@/types';
 import { listLeaveTypeEnum, listModeEnum } from '@/api/enum';
 import { listCommunity } from '@/api/community';
@@ -378,7 +390,7 @@ const addLeaveSubmit = async () => {
 const optionInit = async () => {
   //获取所有游戏社区
   let communityResult: any = await listCommunity()
-  selectOption.value.community = communityResult.rows.map((item: any) => {
+  selectOption.value.community = communityResult.rows?.map((item: any) => {
     let { id, name } = item
     return {
       value: id,
@@ -433,12 +445,24 @@ const clearCache = () => {
   location.replace(location.href);
 }
 
+//刷新浏览器
+const refresh = () => {
+  location.replace(location.href);
+}
+
 //打开聊天室
 const openChart = () => {
-  chartShow.value = true
+  globalStore.isMessageRead = true;
+  globalStore.unreadMessageCount = 0;
+  chartShow.value = true;
   nextTick(() => {
-    virtualListInst.value?.scrollTo({ position: 'bottom' })
+    virtualListInst.value?.scrollTo({ position: 'bottom' });
   })
+}
+
+//关闭聊天室的回调函数
+const closeChartDrawer = () => {
+  globalStore.isMessageRead = false;
 }
 
 //打开活动留言
@@ -455,7 +479,7 @@ const searchLeave = (leaveType: number) => {
 //初始化消息
 const init = async () => {
   let leaveListResult = await listLeave(queryParams.value);
-  leaveListData.value = leaveListResult.data.map((item: any) => {
+  leaveListData.value = leaveListResult.data?.map((item: any) => {
     let { leaveImages } = item;
     return {
       ...item,
@@ -522,7 +546,10 @@ onMounted(() => {
     .leave {
       display: flex;
 
-      .leave-left {}
+      .leave-left {
+        display: flex;
+        align-items: center;
+      }
 
       .leave-right {
         font-size: 13px;
@@ -546,36 +573,9 @@ onMounted(() => {
 
 .setup {
   position: fixed;
-  right: 30px;
+  right: 60px;
   bottom: 40px;
   z-index: 99;
-
-  .icon {
-    width: 32px;
-    height: 32px;
-    animation: revolve 2s linear infinite;
-    cursor: pointer;
-  }
-
-  .setView {
-    position: fixed;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    width: 32px;
-    right: 30px;
-    bottom: 75px;
-    opacity: 0;
-    transition: opacity 0.4s;
-    -webkit-transition: opacity 0.4s;
-
-    .icon {
-      width: 26px;
-      height: 26px;
-      animation: none;
-      cursor: pointer;
-    }
-  }
 }
 
 .setup:hover .setView {

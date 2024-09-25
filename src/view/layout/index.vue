@@ -21,6 +21,7 @@ onMounted(() => {
     notification["info"]({
         content: "更新通知",
         meta: "登录器软件版已发布,请申请QQ群:901243791进行下载。",
+        duration: 7000,
         keepAliveOnHover: true,
     });
     globalStore.initGameSocket()

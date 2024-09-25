@@ -31,6 +31,8 @@
                     <n-timeline-item type="success" content="新增各社区导航,优化地图列表功能 v0.1.4" time="2024-09-14" />
                     <n-timeline-item type="success" content="新增留言版 v0.1.5" time="2024-09-19" />
                     <n-timeline-item type="success" content="新增登录器软件,无需浏览器版本 v0.1.6" time="2024-09-22" />
+                    <n-timeline-item content="新增各社区地图CD显示(需社区提供API接口)" time="待定" line-type="dashed" />
+                    <n-timeline-item content="适配移动端UI页面" time="待定" line-type="dashed" />
                 </n-timeline>
             </n-card>
         </div>

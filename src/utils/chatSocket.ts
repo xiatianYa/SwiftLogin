@@ -7,16 +7,10 @@ const Websocket: any = {
   websocket: null,
   //连接地址
   connectURL: wsUrl,
-  // 是否自动重连
-  is_reonnect: true,
-  // 重连次数
-  reconnect_count: 10,
-  // 已发起重连次数
-  reconnect_current: 1,
   // 重连timer
-  reconnect_timer: null,
+  reconnectTimer: null,
   // 重连频率
-  reconnect_interval: 5000,
+  reconnectInterval: 8000,
   //消息提示
   notification: null,
   // 建立websocket连接
@@ -56,6 +50,7 @@ const Websocket: any = {
         //全局群聊消息
         case chatEnum.ChatGroupType:
           globalStore.chatHistory.push(data);
+          if (!globalStore.isMessageRead) globalStore.unreadMessageCount++;
           break;
         //在线|离线消息
         case chatEnum.OffLineType:
@@ -80,79 +75,49 @@ const Websocket: any = {
           Websocket.reconnect_timer = null;
           Websocket.notification["success"]({
             content: "连接成功",
-            meta: "聊天室连接成功",
+            meta: "聊天服务连接成功",
             duration: 1500,
             keepAliveOnHover: true,
           });
           break;
         default:
-          Websocket.notification["warning"]({
-            content: "未知消息",
-            meta: "消息类型错误",
-            duration: 1500,
-            keepAliveOnHover: true,
-          });
+          break;
       }
     };
     //连接断开时触发
     Websocket.websocket.onclose = (e: any) => {
-      console.log("连接断开");
-      // 需要重新连接
-      if (Websocket.is_reonnect && !Websocket.reconnect_timer) {
-        Websocket.reconnect_timer = setInterval(async () => {
-          //如果重连次数超出,则清除定时器任务
-          if (Websocket.reconnect_current >= Websocket.reconnect_count) {
-            Websocket.notification["warning"]({
-              content: "连接错误",
-              meta: "聊天室连接失败",
-              keepAliveOnHover: true,
-            });
-            clearInterval(Websocket.reconnect_timer);
-            Websocket.websocket = null;
-            return;
-          }
-          // 记录重连次数
-          Websocket.reconnect_current++;
-          // 创建连接
-          Websocket.reconnect(true);
-        }, Websocket.reconnect_interval);
-      }
-    };
-    //连接发生错误
-    Websocket.websocket.onerror = function () {
-      console.log("连接错误");
+      Websocket.onClose();
     };
     //连接成功
     Websocket.websocket.onopen = function () {
-      console.log("连接成功");
+      //连接成功 清空定时任务
+      clearTimeout(Websocket.reconnectTimer);
+      Websocket.reconnectTimer = null;
     };
   },
   // 发送数据 全体消息
   sendMsgAll: (data: any) => {
     Websocket.websocket.send(data);
   },
-  // 断开连接
-  close: (isReonnect: boolean) => {
-    //如果传递是false 则不重新连接
-    if (!isReonnect) {
-      //清空定时任务
-      clearInterval(Websocket.reconnect_timer);
-      //不再重新连接
-      Websocket.is_reonnect = isReonnect;
-      //断开连接
-      Websocket.websocket.close();
-      //重置webSocket
-      Websocket.websocket = null;
-      return;
+  //处理断开连接操作
+  onClose: () => {
+    //当前定时任务为null时 && websocket为null时 自动重连
+    if (!Websocket.reconnectTimer) {
+      //触发重连机制
+      Websocket.reconnectTimer = setInterval(() => {
+        Websocket.notification["error"]({
+          content: "服务断连",
+          meta: "聊天服务断连,自动连接中...",
+          duration: 1000,
+          keepAliveOnHover: true,
+        });
+        // 创建连接
+        Websocket.reconnect(true);
+      }, Websocket.reconnectInterval);
     }
-    //清空本地
-    Websocket.websocket = null;
   },
   //重新连接
   reconnect: () => {
-    if (Websocket.websocket) {
-      Websocket.close();
-    }
     Websocket.init();
   },
 };
