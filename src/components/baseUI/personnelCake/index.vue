@@ -3,7 +3,7 @@
     <ReuseEcharts :option="option" style="height: 100%;" ref="charts" chartsRef="PersonnelCakeRef" />
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch, defineProps } from 'vue';
+import { ref, onMounted, watch, defineProps, onUnmounted } from 'vue';
 import ReuseEcharts from '@/components/reuseEcharts/index.vue';
 
 // 定义 props 类型  
@@ -169,6 +169,16 @@ const drawCharts = () => {
     charts.value.drawCharts();
 }
 
+// 监听窗口大小变化  
+const handleResize = () => {
+    if (charts.value) {
+        //清空之前的数据
+        option.value.legend.data = [];
+        option.value.xAxis.data = [];
+        option.value.series = [];
+        drawCharts();
+    }
+};
 
 watch(props, () => {
     drawCharts()
@@ -180,7 +190,15 @@ onMounted(() => {
     timingFn()
     echartsEvent()
     drawCharts()
+    // 添加窗口大小变化监听  
+    window.addEventListener('resize', handleResize);
 })
+
+onUnmounted(() => {
+    // 移除窗口大小变化监听  
+    window.removeEventListener('resize', handleResize);
+    // 如果需要，可以在这里进行其他清理工作  
+});
 </script>
 
 <style lang="scss" scoped></style>

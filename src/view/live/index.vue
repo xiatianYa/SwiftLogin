@@ -13,8 +13,8 @@
         <!-- 主体 -->
         <n-spin :show="loading" :size="'large'" style="min-height: 50vh;">
             <div class="lives">
-                <n-card class="live mb-10" content-style="padding: 0;" v-for="live in liveData" :key="live.id"
-                    @click="goHref(live.liveUrl)">
+                <n-card class="live mb-10" style="min-width:250px;" content-style="padding: 0;" v-for="live in liveData"
+                    :key="live.id" @click="goHref(live.liveUrl)">
                     <div class="image-container" @mouseover="showStatusId = live.roomId"
                         @mouseleave="showStatusId = null">
                         <n-image width="100%" height="100%" :src="live.bgUrl" :preview-disabled="true" />
@@ -191,6 +191,8 @@ onMounted(() => {
 
     .lives {
         display: flex;
+        justify-content: center;
+        align-items: center;
         flex-wrap: wrap;
         width: 100%;
         height: auto;

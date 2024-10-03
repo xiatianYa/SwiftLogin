@@ -7,24 +7,21 @@
         <!-- 地图搜索栏 -->
         <div class="d_flex d_flex_sb mb-20">
             <div style="width: 90%;">
-                <div class="d_flex mb-10">
-                    <n-select class="mr-5" v-model:value="queryParam.modeId" :options="selectOption.mode"
+                <div class="d_flex flex-wrap">
+                    <n-select class="mr-5 mt-10" v-model:value="queryParam.modeId" :options="selectOption.mode"
                         placeholder="请选择模式" clearable />
-                    <n-select class="mr-5" v-model:value="queryParam.type" :options="selectOption.type"
+                    <n-select class="mr-5 mt-10" v-model:value="queryParam.type" :options="selectOption.type"
                         placeholder="请选择难度" clearable />
                 </div>
-                <div class="d_flex mb-10">
-                    <n-select class="mr-5" v-model:value="queryParam.tag" :options="selectOption.tag"
+                <div class="d_flex flex-wrap">
+                    <n-select class="mr-5 mt-10" v-model:value="queryParam.tag" :options="selectOption.tag"
                         placeholder="请选择标签" clearable />
-                    <n-input class="mr-5" v-model:value="queryParam.label" placeholder="请输入地图名称译名" clearable />
-                </div>
-            </div>
-            <div style="width: 10%;" class="d_flex flex-wrap pl-40">
-                <div style="width: 100%;">
-                    <n-button type="warning" :render-icon="renderIcon(TrashOutline)" @click="onClear">重置</n-button>
+                    <n-input class="mr-5 mt-10" v-model:value="queryParam.label" placeholder="请输入地图名称译名" clearable />
                 </div>
                 <div style="width: 100%;">
-                    <n-button type="info" :render-icon="renderIcon(Search)" @click="onSearch">
+                    <n-button class="mt-10 mr-10" type="warning" :render-icon="renderIcon(TrashOutline)"
+                        @click="onClear">重置</n-button>
+                    <n-button class="mt-10" type="info" :render-icon="renderIcon(Search)" @click="onSearch">
                         查询
                     </n-button>
                 </div>
@@ -51,8 +48,8 @@ import reusePagination from '@/components/reusePagination/index.vue'
 import { ref, h, Component, onMounted } from 'vue';
 import { listModeEnum, listTagEnum, listTypeEnum } from '@/api/enum'
 import { listMap } from '@/api/map'
-import { NSelect, NButton, NIcon, NInput, NTag, NImage,useNotification,NSpin} from 'naive-ui';
-import { Search, TrashOutline,CopyOutline } from '@vicons/ionicons5';
+import { NSelect, NButton, NIcon, NInput, NTag, NImage, useNotification, NSpin } from 'naive-ui';
+import { Search, TrashOutline, CopyOutline } from '@vicons/ionicons5';
 import { CustomType } from '@/types';
 //消息弹出框
 const notification = useNotification()

@@ -6,7 +6,7 @@
         <ClipboardOutline />
       </n-icon>
     </n-float-button>
-    <n-float-button position="relative" class="mb-15" @click="openChart()">
+    <n-float-button position="relative" class="mb-15" @click="openChart()" v-show="userStore.id">
       <n-badge :value="globalStore.unreadMessageCount" :offset="[6, -8]">
         <n-icon>
           <ChatboxEllipsesOutline />
@@ -19,8 +19,8 @@
       </n-icon>
     </n-float-button>
     <!-- 系统设置 -->
-    <n-drawer v-model:show="setDialog" :width="500" placement="right">
-      <n-drawer-content title="系统设置">
+    <n-drawer v-model:show="setDialog" :width="350" placement="right">
+      <n-drawer-content title="系统设置" closable>
         <n-card :bordered="false">
           <n-space vertical>
             <n-select class="mb-10" v-model:value="communityId" :options="selectOption.community" placeholder="请选择指定社区"
@@ -50,20 +50,24 @@
               @click="refresh">
               刷新页面
             </n-button>
+            <n-button class="mr-10" strong secondary type="info" :render-icon="renderIcon(LogInOutline)" @click="logOut"
+              v-if="userStore.id">
+              退出登录
+            </n-button>
           </n-space>
         </n-card>
       </n-drawer-content>
     </n-drawer>
     <!-- 聊天框 -->
-    <n-drawer v-model:show="chartShow" :on-after-leave="closeChartDrawer" :width="500" placement="left">
-      <n-drawer-content body-content-class="content">
+    <n-drawer v-model:show="chartShow" :on-after-leave="closeChartDrawer" :width="350" placement="left">
+      <n-drawer-content body-content-class="content" closable>
         <template #header>
           <div class="chat-header-title">
             <div>
               聊天室
             </div>
             <div class="ml-20">
-              <n-avatar-group :options="globalStore.onlineUserList" :size="32" :max="20">
+              <n-avatar-group :options="globalStore.onlineUserList" :size="32" :max="10">
                 <template #avatar="{ option: { name, src } }">
                   <n-tooltip>
                     <template #trigger>
@@ -115,8 +119,8 @@
       </n-drawer-content>
     </n-drawer>
     <!--留言板-->
-    <n-drawer v-model:show="leaveShow" :width="500" placement="left">
-      <n-drawer-content body-content-class="content">
+    <n-drawer v-model:show="leaveShow" :width="350" placement="left">
+      <n-drawer-content body-content-class="content" closable>
         <template #header>
           <div class="leave-header-title">
             <div>
@@ -160,8 +164,16 @@
                   </div>
                   <div class="leave-right">
                     <div class="ml-10" style="color: #FB7299;">{{ leave.nickName }}</div>
-                    <div class="ml-10 mt-5">{{ leave.leaveMessage }}</div>
-                    <div class="ml-10 mt-5">{{ leave.createTime }}</div>
+                    <n-space class="ml-10 mt-5">
+                      <n-ellipsis :line-clamp="2">
+                        {{ leave.leaveMessage }}
+                      </n-ellipsis>
+                    </n-space>
+                    <n-space class="ml-10 mt-5">
+                      <n-ellipsis :line-clamp="2">
+                        {{ leave.createTime }}
+                      </n-ellipsis>
+                    </n-space>
                     <div class="ml-10">
                       <n-image v-for="image, index in leave.leaveImages" :key="index" width="120" height="120"
                         :src="image" />
@@ -180,7 +192,7 @@
       </n-drawer-content>
     </n-drawer>
     <!-- 新增留言框 -->
-    <n-modal v-model:show="addLeaveShow" transform-origin="center">
+    <n-modal style="width: 350px;" v-model:show="addLeaveShow" transform-origin="center">
       <resuse-form ref="formRef" class="formClass" :formData="addLeaveData" :formOption="leaveOption"
         :formItemOption="selectOption" :rules="rules" labelPosition="right" labelWidth="140">
         <template #ImgUpload>
@@ -201,6 +213,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import QC from '@/assets/js/qqAuth.js';
 import useStore from "@/store";
 import chatEnum from "@/utils/chatEnum";
 import resuseForm from '@/components/reuseForm/index.vue';
@@ -229,7 +242,7 @@ import {
   NFloatButton,
   NBadge
 } from 'naive-ui';
-import { SaveOutline, ChatboxEllipsesOutline, GameControllerOutline, SyncOutline, CogOutline, ClipboardOutline } from '@vicons/ionicons5';
+import { SaveOutline, ChatboxEllipsesOutline, GameControllerOutline, SyncOutline, CogOutline, ClipboardOutline, LogInOutline } from '@vicons/ionicons5';
 import { CustomType } from '@/types';
 import { listLeaveTypeEnum, listModeEnum } from '@/api/enum';
 import { listCommunity } from '@/api/community';
@@ -441,13 +454,14 @@ const saveSet = () => {
 const clearCache = () => {
   //清空浏览器缓存
   localStorage.clear();
+  userStore.clearUserInfo();
   message.success("清除浏览器缓存成功");
-  location.replace(location.href);
+  location.reload();
 }
 
 //刷新浏览器
 const refresh = () => {
-  location.replace(location.href);
+  location.reload();
 }
 
 //打开聊天室
@@ -474,6 +488,18 @@ const openLeave = () => {
 const searchLeave = (leaveType: number) => {
   queryParams.value.leaveType = leaveType;
   init();
+}
+
+//用户退出登录
+const logOut = () => {
+  //清除本地缓存
+  userStore.logOut();
+  //清除第三方登录
+  QC.Login.signOut();
+  //清除websocket连接
+  globalStore.clostChatSocket();
+  //提示
+  message.success("退出成功");
 }
 
 //初始化消息
@@ -554,7 +580,6 @@ onMounted(() => {
       .leave-right {
         font-size: 13px;
         font-weight: 500;
-        color: black;
 
         div {
           width: 100%;
@@ -573,8 +598,8 @@ onMounted(() => {
 
 .setup {
   position: fixed;
-  right: 60px;
-  bottom: 40px;
+  right: 30px;
+  bottom: 10px;
   z-index: 99;
 }
 

@@ -12,24 +12,20 @@
             </n-statistic>
         </div>
         <!-- 搜索 -->
-        <div class="d_flex d_flex_sb mb-20">
-            <n-select class="mr-10" v-model:value="queryParams.communityId" :options="selectOption.community"
+        <div class="d_flex d_flex_sb flex-wrap mb-20">
+            <n-select class="mr-10 mt-10" v-model:value="queryParams.communityId" :options="selectOption.community"
                 placeholder="请选择社区" @update:value="handleUpdateValue" />
-            <n-select class="mr-10" v-model:value="queryParams.modeId" :options="selectOption.mode" placeholder="请选择模式"
-                clearable @update:value="handleUpdateValue" />
-            <n-button class="mr-10" strong secondary type="primary" :render-icon="renderIcon(MapOutline)"
+            <n-select class="mr-10 mt-10" v-model:value="queryParams.modeId" :options="selectOption.mode"
+                placeholder="请选择模式" clearable @update:value="handleUpdateValue" />
+            <n-button class="mr-10 mt-10" strong secondary type="primary" :render-icon="renderIcon(MapOutline)"
                 @click="onMap">
                 地图订阅
-            </n-button>
-            <n-button strong secondary type="info" :render-icon="renderIcon(Search)" @click="onSearch">
-                搜索
             </n-button>
         </div>
         <!-- 表格 -->
         <div>
             <n-spin :show="loading" :size="'large'" style="min-height: 50vh;">
-                <reuseTable :tableColumns="serverColumns" :tableData="serverData" :rowClassName="rowClassName"
-                    v-show="!loading" />
+                <reuseCard :cardData="serverData" :modeData="selectOption.mode" :onPlay :onCopy :onAutomatic />
                 <template #description>
                     加载中,请耐心等待...
                 </template>
@@ -188,20 +184,20 @@
 </template>
 
 <script setup lang="ts">
-import reuseTable from '@/components/reuseTable/index.vue'
+import reuseCard from '@/components/reuseCard/index.vue'
 import gameSocket from '@/utils/gameSocket'
 import useStore from "@/store";
 import { listModeEnum, listTagEnum } from '@/api/enum'
 import { listCommunity } from '@/api/community'
 import { listServer } from '@/api/server'
-import { listMap } from '@/api/map'
+import { listAllMap } from '@/api/map'
 import { getServerInfo } from '@/api/steamApi'
 import { CustomType } from "@/types";
 import type { Component } from 'vue'
 import { ref, h, onMounted, watch } from 'vue';
 import { throttle } from 'lodash'
 import { NSelect, NButton, NIcon, NImage, NScrollbar, NSpin, NProgress, useNotification, NDrawer, NDrawerContent, NCard, NSpace, NSwitch, NInputNumber, NStatistic, NNumberAnimation, NPopover, useMessage, NTag, SelectOption } from 'naive-ui';
-import { Search, AlarmOutline, MapOutline, CopyOutline, EnterOutline, ArrowDownCircleOutline, ArrowUpCircleOutline, CaretForwardCircleOutline, CaretBackCircleOutline, InformationCircleOutline } from '@vicons/ionicons5';
+import { AlarmOutline, MapOutline, CopyOutline, EnterOutline, ArrowDownCircleOutline, ArrowUpCircleOutline, CaretForwardCircleOutline, CaretBackCircleOutline, InformationCircleOutline } from '@vicons/ionicons5';
 import { RowData } from 'naive-ui/es/data-table/src/interface';
 import { isWithinThreeHours } from '@/utils/common'
 
@@ -264,185 +260,6 @@ const selectOption = ref<CustomType>({
     tag: []
 })
 
-//服务器表格字段
-const serverColumns = ref([
-    {
-        type: 'expand',
-        expandable: (rowData: any) => rowData.maxPlayers && rowData.mapName !== '暂无译名',
-        renderExpand: (rowData: any) => {
-            return h('div', [
-                h('div', {
-                    class: "d_flex_ac d_flex_column",
-                    style: {
-                        width: '30%'
-                    }
-                }, [
-                    //左侧盒子
-                    h('div', {
-                        class: "d_flex_ac d_flex_column ml-80",
-                        style: {
-                            width: "100%"
-                        }
-                    },
-                        [
-                            h('h4', rowData.map),
-                            h('h4', "(" + rowData.mapName + ")"),
-                            h('div', {
-                                class: "d_flex"
-                            }, [
-                                h(NImage, {
-                                    src: rowData.mapUrl,
-                                    width: 200,
-                                    class: "mr-10 mt-10"
-                                }),
-                                h('div', {
-                                    class: "d_flex mt-10"
-                                }, [
-                                    h('span', {
-                                        class: "d_flex"
-                                    }, [
-                                        h(
-                                            NTag,
-                                            {
-                                                color: renderColor(rowData.typeName),
-                                                size: 'small',
-                                            },
-                                            { default: () => rowData.typeName }
-                                        )
-                                    ]),
-                                    h('span', {
-                                        class: "d_flex"
-                                    }, rowData.tagName ? rowData.tagName.split(",").filter((item: any) => item != null && item != '').map((item: any) => {
-                                        return h(
-                                            NTag,
-                                            {
-                                                size: 'small',
-                                                type: "success",
-                                                class: "ml-5"
-                                            },
-                                            { default: () => item }
-                                        )
-                                    }) : ""
-                                    )
-                                ])
-                            ])
-                        ]),
-                ]),
-                //右侧盒子
-                h('div', {
-                    style: {
-                        width: '70%'
-                    }
-                }, [
-
-                ])
-            ]
-            )
-        }
-    },
-    {
-        title: '模式',
-        key: 'modeName',
-        sorter: (row1: any, row2: any) => row1.modeName > row2.modeName
-
-    },
-    {
-        title: '服务器名称',
-        key: 'name'
-    },
-    {
-        title: '难度',
-        key: 'type',
-        render(row: any) {
-            if (!row.typeName) return;
-            return h(
-                'div',
-                [
-                    h(
-                        NTag,
-                        {
-                            color: renderColor(row.typeName),
-                            size: 'small',
-                        },
-                        { default: () => row.typeName }
-                    ),
-                ]
-            );
-        },
-    },
-    {
-        title: '地图名',
-        key: 'map'
-    },
-    {
-        title: '译名',
-        key: 'mapName'
-    },
-    {
-        title: '人数',
-        key: 'peopleNumber',
-        render(row: any) {
-            return h(
-                'span',
-                {
-
-                },
-                { default: () => row.players + "/" + row.maxPlayers }
-            )
-        }
-    },
-    {
-        title: '操作',
-        key: 'actions',
-        render(row: any) {
-            return h(
-                'div', // 或者任何你想要的容器元素，这里用 div 作为示例  
-                [
-                    h(
-                        NButton,
-                        {
-                            strong: true,
-                            tertiary: true,
-                            size: 'small',
-                            type: 'info',
-                            style: { marginRight: '10px' },
-                            renderIcon: renderIcon(EnterOutline),
-                            onClick: () => onPlay(row)
-                        },
-                        { default: () => '加入' }
-                    ),
-                    h(
-                        NButton,
-                        {
-                            strong: true,
-                            tertiary: true,
-                            size: 'small',
-                            type: 'info',
-                            style: { marginRight: '10px' },
-                            renderIcon: renderIcon(CopyOutline),
-                            onClick: () => onCopy(row)
-                        },
-                        { default: () => '复制连接指令' }
-                    ),
-                    h(
-                        NButton,
-                        {
-                            strong: true,
-                            tertiary: true,
-                            size: 'small',
-                            type: 'info',
-                            style: { marginRight: '10px' },
-                            renderIcon: renderIcon(AlarmOutline),
-                            onClick: () => onAutomatic(row)
-                        },
-                        { default: () => '自动挤服' }
-                    )
-                ]
-            );
-        },
-    }
-])
-
 //开启自动挤服
 const handleAutomaticPersonnel = (value: boolean) => {
     //关闭挤服
@@ -465,8 +282,7 @@ const handleAutomaticPersonnel = (value: boolean) => {
 //开启/关闭 自动订阅地图
 const handleAutomaticMap = (value: boolean) => {
     if (value) {
-        if (Object.keys(globalStore.autoMapListInfo).length === 0 &&
-            Object.getOwnPropertyNames(globalStore.autoMapListInfo).length === 0) {
+        if (globalStore.autoMapListInfo.length === 0) {
             message.warning("请先选择订阅地图!");
             return;
         }
@@ -509,6 +325,7 @@ const appendMap = throttle(() => {
         localStorage.removeItem("autoMap");
         localStorage.setItem("autoMap", JSON.stringify(globalStore.autoMapListInfo));
         message.success("添加成功");
+        mapInfo.value = {};
     }
     appendMap();
 }, 500)
@@ -666,8 +483,8 @@ const optionInit = async () => {
         }
     })
     //获取所有的地图
-    let mapResult: any = await listMap(queryParams.value)
-    selectOption.value.map = mapResult.rows.map((item: any) => {
+    let mapResult: any = await listAllMap(queryParams.value)
+    selectOption.value.map = mapResult.data.map((item: any) => {
         let { name, label, tagName, typeName, mapUrl } = item;
         return {
             value: name.trim(),
@@ -717,7 +534,7 @@ const init = async () => {
 
     //初始化服务器参数
     let responsePromise: any = await getServerInfo(queryParams.value.communityId);
-
+    if (!responsePromise) responsePromise = [];
     playNumber.value = 0;
     maxPlayNumber.value = 0;
     responsePromise.map((item: any) => {
@@ -725,7 +542,7 @@ const init = async () => {
         let serverInfo = item.response.servers
         if (!serverInfo) return;
         //获取服务器地址 地图名 在线玩家 最大玩家
-        let { addr, map, players, max_players } = serverInfo[0]
+        let { addr, map, players, max_players } = serverInfo[0];
         serverInfo = serverResult.find((item: any) => item.ip + ":" + item.port == addr);
         if (serverInfo) {
             serverInfo.key = serverInfo.id;
@@ -747,14 +564,6 @@ const init = async () => {
     loading.value = false;
 }
 
-//表格自定义样式
-const rowClassName = (row: RowData) => {
-    if (!row.players && !row.maxPlayers) {
-        return 'too-old'
-    }
-    return '';
-}
-
 //地图数据接听
 watch(() => serverData.value, (newValue: any, oldValue: any) => {
     //当地图订阅开启
@@ -765,15 +574,13 @@ watch(() => serverData.value, (newValue: any, oldValue: any) => {
                 let responsePromise = JSON.parse(value)
                 responsePromise.map((item: any) => {
                     //获取服务器信息
-                    let serverInfo = item.response.servers
+                    let serverInfo = item.response.servers;
                     if (!serverInfo) return;
                     //获取地图名
                     let { name, addr, map } = serverInfo[0];
                     //判断地图是否已提醒过
                     let receiveResult = globalStore.autoMapReceiveList.find((item: any) => item.addr == addr && item.map == map && isWithinThreeHours(item.receiveDate))
-                    if (receiveResult) {
-                        return;
-                    }
+                    if (receiveResult) return;
                     //查找订阅地图是否存在
                     let mapResult = globalStore.autoMapListInfo.find((item: any) => item.value == map)
                     if (mapResult) {
@@ -782,25 +589,25 @@ watch(() => serverData.value, (newValue: any, oldValue: any) => {
                             let popNotice = () => {
                                 const notification = new Notification('地图订阅通知', {
                                     body: `您所订阅的地图 ${map}(${mapResult.label ? mapResult.label : '暂无译名'}) 已在 ${name} 进行游戏。`
-                                })
+                                });
                                 // 点击通知的回调函数
                                 notification.onclick = () => {
-                                    window.open('https://www.bluearchive.top')
-                                    notification.close()
+                                    window.open('https://www.bluearchive.top');
+                                    notification.close();
                                 }
                             }
                             /* 授权过通知 */
                             if (Notification.permission === 'granted') {
-                                popNotice()
+                                popNotice();
                             } else {
                                 /* 未授权，先询问授权 */
                                 Notification.requestPermission(() => {
-                                    popNotice()
+                                    popNotice();
                                 })
                             }
                         }
                         //添加到全局订图列表 避免重复提示
-                        globalStore.autoMapReceiveList.push({ addr, map, receiveDate: new Date() })
+                        globalStore.autoMapReceiveList.push({ addr, map, receiveDate: new Date() });
                     }
                 })
             } else if (!MapCommunityId.value) {
@@ -917,10 +724,6 @@ onMounted(async () => {
     .title {
         font-size: 16px;
         font-weight: bolder
-    }
-
-    :deep(.too-old td) {
-        color: rgba(230, 71, 74, 1) !important;
     }
 }
 </style>

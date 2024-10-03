@@ -36,7 +36,7 @@
                 </n-timeline>
             </n-card>
         </div>
-        <div class="main-right ml-10">
+        <div class="main-right mr-10">
             <n-card class="echarts mb-10">
                 <personnelCake :chartData="personnelCakeData"></personnelCake>
             </n-card>
@@ -66,6 +66,68 @@
                     <n-image width="100%" height="200"
                         src="https://bluearchive.top/statics/2024/09/13/zanshangma.png" />
                 </n-space>
+                <n-space>
+                    <span style="font-size: 16px;font-weight: bold;">
+                        赞赏记录
+                    </span>
+                </n-space>
+                <n-table :bordered="true" :single-line="false">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>赞赏金额</th>
+                            <th>赞赏时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>无邬</td>
+                            <td>3元</td>
+                            <td>2024-09-14</td>
+                        </tr>
+                        <tr>
+                            <td>Cmz</td>
+                            <td>5元</td>
+                            <td>2024-09-23</td>
+                        </tr>
+                        <tr>
+                            <td>阿飞</td>
+                            <td>5元</td>
+                            <td>2024-09-24</td>
+                        </tr>
+                        <tr>
+                            <td>kk</td>
+                            <td>10元</td>
+                            <td>2024-09-25</td>
+                        </tr>
+                        <tr>
+                            <td>红豆</td>
+                            <td>5元</td>
+                            <td>2024-09-28</td>
+                        </tr>
+                        <tr>
+                            <td>Rainsfield☨</td>
+                            <td>50元</td>
+                            <td>2024-10-1</td>
+                        </tr>
+                        <tr>
+                            <td>气轩辕</td>
+                            <td>8.8.8元</td>
+                            <td>2024-10-1</td>
+                        </tr>
+                        <tr>
+                            <td>Noxx_</td>
+                            <td>10元</td>
+                            <td>2024-10-2</td>
+                        </tr>
+                        <tr>
+                            <td>不关杰杰的事</td>
+                            <td>60元</td>
+                            <td>2024-10-3</td>
+                        </tr>
+                    </tbody>
+                </n-table>
+                <n-space class="mt-5">作者在这里非常感谢以上赞助对该登录器的支持,非常感谢。</n-space>
             </n-card>
         </div>
     </div>
@@ -77,7 +139,7 @@ import personnelCake from "@/components/baseUI/personnelCake/index.vue";
 import useStore from "@/store";
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { statisticsEchats } from '@/api/statistics';
-import { NTimeline, NTimelineItem, NCard, NSpace, NImage, NAvatar, NTooltip } from 'naive-ui';
+import { NTimeline, NTimelineItem, NCard, NSpace, NImage, NAvatar, NTooltip, NTable } from 'naive-ui';
 import { getUserList } from "@/api/chat";
 let { globalStore } = useStore();
 
@@ -144,6 +206,7 @@ watch(() => globalStore.serverInfo, async (newValue: any, oldValue: any) => {
 }, { deep: true })
 onUnmounted(() => {
     clearInterval(personnelTimer.value);
+    personnelTimer.value = null;
 })
 onMounted(() => {
     init();
@@ -153,12 +216,15 @@ onMounted(() => {
 <style scoped lang="scss">
 .mainPage {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     width: 100%;
     height: auto;
 
     .main-left {
-        width: 50%;
+        width: 48%;
         height: 100%;
+        min-width: 250px;
 
         .echarts {
             width: 100%;
@@ -173,8 +239,9 @@ onMounted(() => {
     }
 
     .main-right {
-        width: 50%;
+        width: 48%;
         height: 100%;
+        min-width: 250px;
 
         .echarts {
             width: 100%;
@@ -185,6 +252,48 @@ onMounted(() => {
         .sponsor {
             width: 100%;
             min-height: 250px;
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .mainPage {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        width: 100%;
+        height: auto;
+
+        .main-left {
+            width: 100%;
+            height: 100%;
+
+            .echarts {
+                width: 100%;
+                height: 400px;
+                border-radius: 5px;
+            }
+
+            .timeline {
+                width: 100%;
+                border-radius: 5px;
+            }
+        }
+
+        .main-right {
+            width: 100%;
+            height: 100%;
+
+            .echarts {
+                width: 100%;
+                height: 400px;
+                border-radius: 5px;
+            }
+
+            .sponsor {
+                width: 100%;
+                min-height: 250px;
+            }
         }
     }
 }

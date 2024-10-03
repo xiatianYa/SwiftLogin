@@ -1,7 +1,11 @@
 <template>
-    <n-layout style="height: 100vh;">
-        <Header class="layoutHeader"></Header>
-        <RouterView />
+    <n-layout style="height: 100vh;x">
+        <n-layout has-sider>
+            <Header></Header>
+            <n-layout>
+                <RouterView></RouterView>
+            </n-layout>
+        </n-layout>
         <setUp></setUp>
     </n-layout>
 </template>

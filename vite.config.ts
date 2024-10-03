@@ -11,7 +11,6 @@ export default defineConfig({
       "/api": {
         target: "https://www.bluearchive.top/",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""), // 路径重写，将 '/api' 前缀去掉
       },
     },
     port: 9090,

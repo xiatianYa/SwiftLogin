@@ -5,10 +5,10 @@
             <div class="title">绑键工具</div>
         </div>
         <!-- 工具绑定栏 -->
-        <div class="d_flex d_flex_sb mb-20">
-            <n-select class="mr-5" v-model:value="key" :options="keyOptions" placeholder="请选择按键" clearable />
-            <n-select class="mr-5" v-model:value="value" :options="valueOptions" placeholder="请选择指令" clearable />
-            <n-button class="mr-5" strong secondary type="info" :render-icon="renderIcon(SaveOutline)"
+        <div class="d_flex d_flex_sb flex-wrap mb-20">
+            <n-select class="mr-5 mt-10" v-model:value="key" :options="keyOptions" placeholder="请选择按键" clearable />
+            <n-select class="mr-5 mt-10" v-model:value="value" :options="valueOptions" placeholder="请选择指令" clearable />
+            <n-button class="mr-5 mt-10" strong secondary type="info" :render-icon="renderIcon(SaveOutline)"
                 @click="saveButton">
                 保存指令
             </n-button>
